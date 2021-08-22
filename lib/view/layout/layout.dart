@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:suividevente/utils/constants.dart';
 import 'package:suividevente/utils/menu_item.dart';
-import 'package:suividevente/view/home/home.dart';
+import 'package:suividevente/view/home/calendar_widget.dart';
 
 class Layout extends StatefulWidget {
   const Layout({Key? key}) : super(key: key);
@@ -20,7 +20,7 @@ class _LayoutState extends State<Layout> {
       body: Stack(
         children: [
           sideMenu(size),
-          const Home(title: 'Home',),
+          const CalendarWidget(),
         ],
       ),
     );
@@ -28,7 +28,7 @@ class _LayoutState extends State<Layout> {
 
   Widget sideMenu(Size size) {
     return Container(
-      color: kDarkGreyColor,
+      color: kDefaultBackgroundColor,
       padding: const EdgeInsets.all(10.0),
       alignment: Alignment.centerLeft,
       child: Column(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:suividevente/model/my_event.dart';
 
 const Color kDefaultBackgroundColor = Color(0xFF14202B);
 const Color kLightBackgroundColor = Color(0xFF263648);
@@ -11,3 +12,5 @@ const Color kBlueColor = Color(0xFF408FEF);
 const Color kDarkBlueColor = Color(0xFF264C78);
 const Color kRedColor = Color(0xFFED4741);
 const Color kBtnSelectedColor = Color(0xFF39506A);
+
+const titleSize = 18.0;
