@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:suividevente/model/meteo.dart';
+import 'package:suividevente/utils/constants.dart';
 
 import 'product.dart';
 
@@ -21,11 +21,11 @@ class MyEvent {
     Product(title: "Gants en laine", price: "30.90", img: "assets/background/back1.jpeg"),
   ];
 
-  bool meteo1 = false;
-  bool meteo2 = false;
-  bool meteo3 = false;
-  bool meteo4 = false;
-  bool meteo5 = false;
+  bool sun = false;
+  bool cloud = false;
+  bool tint = false;
+  bool pooCloud = false;
+  bool cloudSomething = false;
 
   List<ProductBis> sortProdList = [];
   List<Product> panier = [];
@@ -84,6 +84,8 @@ class MyEvent {
       }
     });
   }
+
+  Color get getColor => panier.isNotEmpty ? color : kLightBackgroundColor;
 
   @override
   String toString() => title;

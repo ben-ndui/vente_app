@@ -1,17 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/date_symbol_data_file.dart';
 import 'package:provider/provider.dart';
 import 'package:suividevente/model/event_data_source.dart';
 import 'package:suividevente/model/event_provider.dart';
 import 'package:suividevente/utils/constants.dart';
-import 'package:suividevente/utils/theme.dart';
 import 'package:suividevente/view/home/components/addEvent/add_event.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import 'components/addEvent/tasks_widget.dart';
-import 'components/vente_widget.dart';
 
 class CalendarWidget extends StatefulWidget {
   const CalendarWidget({Key? key}) : super(key: key);
@@ -100,13 +97,6 @@ class _CalendarWidgetState extends State<CalendarWidget> {
         todayTextStyle: const TextStyle(
           color: kWhiteColor,
         ),
-        appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details){
-          return Center(
-            child: Container(
-              color: details.appointments.first.color,
-            ),
-          );
-        },
         headerHeight: 70,
         headerDateFormat: 'MMMM, yyy',
         headerStyle: const CalendarHeaderStyle(
@@ -125,8 +115,15 @@ class _CalendarWidgetState extends State<CalendarWidget> {
         ),
         viewHeaderHeight: 40.0,
         todayHighlightColor: kLightBackgroundColor,
+        appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details){
+          return Center(
+            child: Container(
+              color: details.appointments.first.color,
+            ),
+          );
+        },
         monthViewSettings: const MonthViewSettings(
-          appointmentDisplayMode: MonthAppointmentDisplayMode.appointment,
+          appointmentDisplayMode: MonthAppointmentDisplayMode.none,
           appointmentDisplayCount: 2,
           showTrailingAndLeadingDates: false,
           monthCellStyle: MonthCellStyle(
@@ -142,18 +139,56 @@ class _CalendarWidgetState extends State<CalendarWidget> {
           )
         ),
         monthCellBuilder: (BuildContext buildContext, MonthCellDetails details){
-          return Column(
-            children: [
-              Container(
+          final provider = Provider.of<EventProvider>(context);
+          provider.setDate(details.date);
+          if(details.appointments.isNotEmpty){
+            return Container(
+              //color: kRedColor,
+              height: 30.0,
+              alignment: Alignment.center,
+              child: Stack(
                 alignment: Alignment.center,
-                child: Text(
-                  details.date.day.toString(),
-                  style: const TextStyle(
-                    color: kWhiteColor,
+                children: [
+                  Text(
+                    details.date.day.toString(),
+                    style: const TextStyle(
+                      color: kWhiteColor,
+                    ),
                   ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 40.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: details.appointments.map((e){
+                        final dynamic occurrenceAppointment = e;
+                        return Container(
+                          width: 13.0,
+                          height: 15.0,
+                          margin: const EdgeInsets.all(2.0),
+                          decoration: BoxDecoration(
+                            color: occurrenceAppointment.getColor,
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  )
+                ],
+              ),
+            );
+          }
+          return Center(
+            child: Container(
+              alignment: Alignment.center,
+              child: Text(
+                details.date.day.toString(),
+                style: const TextStyle(
+                  color: kWhiteColor,
                 ),
               ),
-            ],
+            ),
           );
         },
         onTap: (details) {
@@ -249,7 +284,6 @@ class _CalendarWidgetState extends State<CalendarWidget> {
   }
 
   Widget myButton(String title, Color color, nextScreen) {
-    var size = MediaQuery.of(context).size;
     return Expanded(
       child: Container(
         decoration: BoxDecoration(

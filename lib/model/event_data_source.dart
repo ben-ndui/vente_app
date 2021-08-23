@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:suividevente/utils/constants.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import 'my_event.dart';
@@ -31,7 +32,7 @@ class EventDataSource extends CalendarDataSource{
   @override
   Color getColor(int index) {
     // TODO: implement getColor
-    return getEvent(index).color;
+    return getEvent(index).panier.isNotEmpty ? getEvent(index).color : kLightBackgroundColor;
   }
 
   @override

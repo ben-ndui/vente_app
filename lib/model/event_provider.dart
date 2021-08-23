@@ -24,11 +24,13 @@ class EventProvider extends ChangeNotifier{
 
   void setEvent(MyEvent event){
     if(_events.contains(event)){
-      for (var event2 in _events) {
-        if(event2.title == event.title){
-          event2.panier = event.panier;
+      _events.where((element){
+        if(element.title.contains(event.title)){
+          element.panier = event.panier;
+          return true;
         }
-      }
+        return false;
+      });
     }
     notifyListeners();
   }

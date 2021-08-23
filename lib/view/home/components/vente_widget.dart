@@ -68,7 +68,6 @@ class _VenteWidgetState extends State<VenteWidget>
   }
 
   Widget rightPanel(BuildContext context) {
-    final provider = Provider.of<EventProvider>(context, listen: false);
     return SizedBox(
       width: 250.0,
       child: Stack(
@@ -250,7 +249,7 @@ class _VenteWidgetState extends State<VenteWidget>
   }
 
   sortList() {
-    int summus = 0, i, j = 0;
+    int i;
     for (i = 0; i < widget.selectedEvent.listProduit.length; i++) {
       if (widget.selectedEvent.listProduit[i].title
           .contains(widget.selectedEvent.listProduit[i + 1].title)) {}
@@ -289,10 +288,9 @@ class _VenteWidgetState extends State<VenteWidget>
                       });
                       provider.setEvent(widget.selectedEvent);
                     },
-                    child: Container(
+                    child: SizedBox(
                       width: 300.0,
                       height: 100.0,
-                      //color: Colors.green,
                       child: Card(
                         child: Column(
                           mainAxisSize: MainAxisSize.max,
@@ -406,12 +404,12 @@ class _VenteWidgetState extends State<VenteWidget>
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                buildMeteoButton(FontAwesomeIcons.solidSun, "sun", widget.selectedEvent.meteo1),
-                buildMeteoButton(FontAwesomeIcons.cloud, "cloud", widget.selectedEvent.meteo2),
-                buildMeteoButton(FontAwesomeIcons.tint, "tint", widget.selectedEvent.meteo3),
-                buildMeteoButton(FontAwesomeIcons.pooStorm, "pooStorm", widget.selectedEvent.meteo4),
+                buildMeteoButton(FontAwesomeIcons.solidSun, "sun", widget.selectedEvent.sun),
+                buildMeteoButton(FontAwesomeIcons.cloud, "cloud", widget.selectedEvent.cloud),
+                buildMeteoButton(FontAwesomeIcons.tint, "tint", widget.selectedEvent.tint),
+                buildMeteoButton(FontAwesomeIcons.pooStorm, "pooStorm", widget.selectedEvent.pooCloud),
                 buildMeteoButton(FontAwesomeIcons.cloudMeatball, "cloudMeatball",
-                    widget.selectedEvent.meteo5),
+                    widget.selectedEvent.cloudSomething),
               ],
             )
           ],
@@ -428,7 +426,7 @@ class _VenteWidgetState extends State<VenteWidget>
             final provider =
             Provider.of<EventProvider>(context, listen: false);
             setState(() {
-              widget.selectedEvent.meteo1 = !widget.selectedEvent.meteo1;
+              widget.selectedEvent.sun = !widget.selectedEvent.sun;
             });
             provider.setEvent(widget.selectedEvent);
             break;
@@ -436,7 +434,7 @@ class _VenteWidgetState extends State<VenteWidget>
             final provider =
             Provider.of<EventProvider>(context, listen: false);
             setState(() {
-              widget.selectedEvent.meteo2 = !widget.selectedEvent.meteo2;
+              widget.selectedEvent.cloud = !widget.selectedEvent.cloud;
             });
             provider.setEvent(widget.selectedEvent);
             break;
@@ -444,7 +442,7 @@ class _VenteWidgetState extends State<VenteWidget>
             final provider =
             Provider.of<EventProvider>(context, listen: false);
             setState(() {
-              widget.selectedEvent.meteo3 = !widget.selectedEvent.meteo3;
+              widget.selectedEvent.tint = !widget.selectedEvent.tint;
             });
             provider.setEvent(widget.selectedEvent);
             break;
@@ -452,7 +450,7 @@ class _VenteWidgetState extends State<VenteWidget>
             final provider =
             Provider.of<EventProvider>(context, listen: false);
             setState(() {
-              widget.selectedEvent.meteo4 = !widget.selectedEvent.meteo4;
+              widget.selectedEvent.pooCloud = !widget.selectedEvent.pooCloud;
             });
             provider.setEvent(widget.selectedEvent);
             break;
@@ -460,7 +458,7 @@ class _VenteWidgetState extends State<VenteWidget>
             final provider =
             Provider.of<EventProvider>(context, listen: false);
             setState(() {
-              widget.selectedEvent.meteo5 = !widget.selectedEvent.meteo5;
+              widget.selectedEvent.cloudSomething = !widget.selectedEvent.cloudSomething;
             });
             provider.setEvent(widget.selectedEvent);
             break;

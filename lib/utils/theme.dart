@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'constants.dart';
-
 BoxDecoration defaultDecoration(Color bgColor){
   return BoxDecoration(
     color: bgColor,

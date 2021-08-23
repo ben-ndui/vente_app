@@ -14,7 +14,8 @@ class AddEvent extends StatefulWidget {
   final String matinOuSoir;
   final MyEvent? event;
 
-  const AddEvent({Key? key, this.event, required this.matinOuSoir}) : super(key: key);
+  const AddEvent({Key? key, this.event, required this.matinOuSoir})
+      : super(key: key);
 
   @override
   _AddEventState createState() => _AddEventState();
@@ -62,11 +63,6 @@ class _AddEventState extends State<AddEvent> {
       body: Stack(
         alignment: AlignmentDirectional.center,
         children: [
-          Image.asset(
-            "assets/background/back1.jpeg",
-            fit: BoxFit.cover,
-            width: MediaQuery.of(context).size.width,
-          ),
           Column(
             mainAxisSize: MainAxisSize.max,
             children: [
@@ -84,14 +80,11 @@ class _AddEventState extends State<AddEvent> {
                         borderRadius: BorderRadius.circular(4.0),
                       ),
                     ),
-                    Row(
-                      children: buildEditingActions(),
-                    ),
                   ],
                 ),
               ),
               SizedBox(
-                height: MediaQuery.of(context).size.height / 5,
+                height: MediaQuery.of(context).size.height / 8,
               ),
               Center(
                 child: Container(
@@ -122,6 +115,39 @@ class _AddEventState extends State<AddEvent> {
                           height: 12.0,
                         ),
                         buildMeteo(),
+                        const SizedBox(
+                          height: 12.0,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: TextButton.icon(
+                            onPressed: () {
+                              saveEventForm();
+                            },
+
+                            /// CALLBACK ACTION HERE
+                            icon: const FaIcon(
+                              FontAwesomeIcons.check,
+                              color: kWhiteColor,
+                            ),
+                            label: const Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: Text(
+                                "Enregistrer",
+                                style: TextStyle(
+                                  color: kWhiteColor,
+                                ),
+                              ),
+                            ),
+                            style: TextButton.styleFrom(
+                              backgroundColor: kDefaultBackgroundColor,
+                              elevation: 2.0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(100.0),
+                              ),
+                            ),
+                          ),
+                        )
                       ],
                     ),
                   ),
@@ -156,7 +182,7 @@ class _AddEventState extends State<AddEvent> {
         border: UnderlineInputBorder(),
         hintText: 'Ajouter un titre',
       ),
-      onFieldSubmitted: (_){},
+      onFieldSubmitted: (_) {},
       validator: (title) => title != null && title.isEmpty
           ? "Veuillez ajouter un titre s'il vous plait"
           : null,
@@ -195,35 +221,47 @@ class _AddEventState extends State<AddEvent> {
           case "sun":
             setState(() {
               _sun = !_sun;
-              final mete = Meteo("sun", FontAwesomeIcons.sun, _sun ? kYellowColor : kGreyColor, value: _sun);
+              final mete = Meteo(
+                  "sun", FontAwesomeIcons.sun, _sun ? kYellowColor : kGreyColor,
+                  value: _sun);
               _sun ? meteo.add(mete) : meteo.remove(mete);
             });
             break;
           case "cloud":
             setState(() {
               _cloud = !_cloud;
-              final mete = Meteo("cloud", FontAwesomeIcons.cloud, _cloud ? kYellowColor : kGreyColor, value: _cloud);
+              final mete = Meteo("cloud", FontAwesomeIcons.cloud,
+                  _cloud ? kYellowColor : kGreyColor,
+                  value: _cloud);
               _cloud ? meteo.add(mete) : meteo.remove(mete);
             });
             break;
           case "tint":
             setState(() {
               _tint = !_tint;
-              final mete = Meteo("tint",FontAwesomeIcons.tint, _tint ? kYellowColor : kGreyColor, value: _tint);
+              final mete = Meteo("tint", FontAwesomeIcons.tint,
+                  _tint ? kYellowColor : kGreyColor,
+                  value: _tint);
               _tint ? meteo.add(mete) : meteo.remove(mete);
             });
             break;
           case "pooStorm":
             setState(() {
               _pooStorm = !_pooStorm;
-              final mete = Meteo("pooStorm", FontAwesomeIcons.pooStorm, _pooStorm ? kYellowColor : kGreyColor, value: _pooStorm);
+              final mete = Meteo("pooStorm", FontAwesomeIcons.pooStorm,
+                  _pooStorm ? kYellowColor : kGreyColor,
+                  value: _pooStorm);
               _pooStorm ? meteo.add(mete) : meteo.remove(mete);
             });
             break;
           case "cloudMeatball":
             setState(() {
               _cloudMeatball = !_cloudMeatball;
-              final mete = Meteo("cloudMeatball", FontAwesomeIcons.cloudMeatball, _cloudMeatball ? kYellowColor : kGreyColor, value: _cloudMeatball);
+              final mete = Meteo(
+                  "cloudMeatball",
+                  FontAwesomeIcons.cloudMeatball,
+                  _cloudMeatball ? kYellowColor : kGreyColor,
+                  value: _cloudMeatball);
               _cloudMeatball ? meteo.add(mete) : meteo.remove(mete);
             });
             break;
@@ -378,7 +416,7 @@ class _AddEventState extends State<AddEvent> {
     final isValid = _formKey.currentState!.validate();
 
     if (isValid) {
-      if(widget.matinOuSoir.contains("matin")){
+      if (widget.matinOuSoir.contains("matin")) {
         final MyEvent event = MyEvent(
           titleController.text,
           kYellowColor,
@@ -391,18 +429,18 @@ class _AddEventState extends State<AddEvent> {
         final provider = Provider.of<EventProvider>(context, listen: false);
 
         setState(() {
-          event.meteo1 = _sun;
-          event.meteo2 = _cloud;
-          event.meteo3 = _tint;
-          event.meteo4 = _pooStorm;
-          event.meteo4 = _cloudMeatball;
+          event.sun = _sun;
+          event.cloud = _cloud;
+          event.tint = _tint;
+          event.pooCloud = _pooStorm;
+          event.pooCloud = _cloudMeatball;
         });
 
         provider.addEvent(event);
         Navigator.of(context).pop();
       }
 
-      if(widget.matinOuSoir.contains("soir")){
+      if (widget.matinOuSoir.contains("soir")) {
         final event = MyEvent(
           titleController.text,
           kBlueColor,
@@ -412,9 +450,18 @@ class _AddEventState extends State<AddEvent> {
           false,
         );
 
-        final product1 = Product(title: "Pull en laine", price: "30.90", img: "assets/background/back1.jpeg");
-        final product2 = Product(title: "Pull en cuir", price: "90.90", img: "assets/background/back1.jpeg");
-        final product3 = Product(title: "Pull en bois", price: "123.90", img: "assets/background/back1.jpeg");
+        final product1 = Product(
+            title: "Pull en laine",
+            price: "30.90",
+            img: "assets/background/back1.jpeg");
+        final product2 = Product(
+            title: "Pull en cuir",
+            price: "90.90",
+            img: "assets/background/back1.jpeg");
+        final product3 = Product(
+            title: "Pull en bois",
+            price: "123.90",
+            img: "assets/background/back1.jpeg");
 
         event.listProduit.add(product1);
         event.listProduit.add(product2);

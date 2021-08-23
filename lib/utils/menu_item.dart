@@ -5,7 +5,7 @@ import 'package:suividevente/utils/constants.dart';
 class MenuItem extends StatelessWidget {
   final String title;
   final FaIcon icon;
-  final func;
+  final dynamic func;
 
   const MenuItem({Key? key, required this.title, required this.icon, this.func}) : super(key: key);
 

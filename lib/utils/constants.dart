@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:suividevente/model/my_event.dart';
 
 const Color kDefaultBackgroundColor = Color(0xFF14202B);
 const Color kLightBackgroundColor = Color(0xFF263648);

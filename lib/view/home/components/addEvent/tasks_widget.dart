@@ -36,20 +36,20 @@ class _TasksWidgetState extends State<TasksWidget> {
 
   Widget appointmentBuilder(
       BuildContext context, CalendarAppointmentDetails details) {
-    final event = details.appointments.first;
+    final eventy = details.appointments.first;
     return GestureDetector(
       onTap: (){
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => VenteWidget(selectedEvent: event,)));
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => VenteWidget(selectedEvent: eventy,)));
       },
       child: Container(
         width: details.bounds.width,
         height: details.bounds.height,
         decoration: BoxDecoration(
-          color: event.color,
+          color: eventy.color,
         ),
         child: Center(
           child: Text(
-            event.title,
+            eventy.title,
             style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
           ),
         ),
