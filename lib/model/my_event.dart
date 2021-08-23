@@ -76,13 +76,13 @@ class MyEvent {
   }
 
   void addProductToPanier(Product product){
-    panier.forEach((element) {
+    for (var element in panier) {
       if(element.title == product.title){
         element.nbProd = element.nbProd + 1;
       }else{
         panier.add(product);
       }
-    });
+    }
   }
 
   Color get getColor => panier.isNotEmpty || sun || cloud || tint || pooCloud || cloudSomething ? color : kLightBackgroundColor;
