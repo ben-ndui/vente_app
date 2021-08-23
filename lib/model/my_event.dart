@@ -85,7 +85,7 @@ class MyEvent {
     });
   }
 
-  Color get getColor => panier.isNotEmpty ? color : kLightBackgroundColor;
+  Color get getColor => panier.isNotEmpty || sun || cloud || tint || pooCloud || cloudSomething ? color : kLightBackgroundColor;
 
   @override
   String toString() => title;
