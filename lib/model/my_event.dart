@@ -10,16 +10,7 @@ class MyEvent {
   final DateTime to;
   final Color color;
   final bool isAllDay;
-  List<Product> listProduit = [
-    Product(title: "Pull en laine", price: "30.90", img: "assets/background/back1.jpeg"),
-    Product(title: "Pull en laine", price: "30.90", img: "assets/background/back1.jpeg"),
-    Product(title: "Pantalon en laine", price: "30.90", img: "assets/background/back1.jpeg"),
-    Product(title: "Pantalon en laine", price: "30.90", img: "assets/background/back1.jpeg"),
-    Product(title: "Short en laine", price: "30.90", img: "assets/background/back1.jpeg"),
-    Product(title: "Short en laine", price: "30.90", img: "assets/background/back1.jpeg"),
-    Product(title: "Gants en laine", price: "30.90", img: "assets/background/back1.jpeg"),
-    Product(title: "Gants en laine", price: "30.90", img: "assets/background/back1.jpeg"),
-  ];
+  List<Product> listProduit = [];
 
   bool sun = false;
   bool cloud = false;
@@ -68,9 +59,9 @@ class MyEvent {
 
   String getTotalPanier(){
     double summm = 0;
-    panier.forEach((element) {
+    for (var element in panier) {
       summm = summm + (double.parse(element.price) * element.nbProd);
-    });
+    }
 
     return summm.toStringAsFixed(2);
   }

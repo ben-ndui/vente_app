@@ -450,23 +450,6 @@ class _AddEventState extends State<AddEvent> {
           false,
         );
 
-        final product1 = Product(
-            title: "Pull en laine",
-            price: "30.90",
-            img: "assets/background/back1.jpeg");
-        final product2 = Product(
-            title: "Pull en cuir",
-            price: "90.90",
-            img: "assets/background/back1.jpeg");
-        final product3 = Product(
-            title: "Pull en bois",
-            price: "123.90",
-            img: "assets/background/back1.jpeg");
-
-        event.listProduit.add(product1);
-        event.listProduit.add(product2);
-        event.listProduit.add(product3);
-
         final provider = Provider.of<EventProvider>(context, listen: false);
 
         provider.addEvent(event);

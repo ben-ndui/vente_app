@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "444754953540",
+    "project_id": "suivi-de-vente",
+    "storage_bucket": "suivi-de-vente.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444754953540:android:dd4fa352c0942961f54311",
+        "android_client_info": {
+          "package_name": "com.smoothndesign.suividevente"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "444754953540-5e6ksomi97646gma21dk1brprk98ife2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI1gOAQJL-NJEnWXm3oWXBMnWE0zYG-EY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "444754953540-5e6ksomi97646gma21dk1brprk98ife2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

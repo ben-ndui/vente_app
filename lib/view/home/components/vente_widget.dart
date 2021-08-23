@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -24,7 +25,6 @@ class _VenteWidgetState extends State<VenteWidget>
   bool openPrice = false;
   double tranx = 0, trany = 0, scale = 1.0;
 
-
   bool reverse = false, reverse1 = false;
 
   List<Meteo> meteo = [];
@@ -40,7 +40,7 @@ class _VenteWidgetState extends State<VenteWidget>
     controller = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this)
       ..addListener(() => setState(() {}));
-    animation = Tween(begin: 200.0, end: 30.0).animate(controller);
+    animation = Tween(begin: 400.0, end: 0.0).animate(controller);
     controller.forward();
   }
 
@@ -86,10 +86,15 @@ class _VenteWidgetState extends State<VenteWidget>
                           delprod = !delprod;
                         });
                       },
-                      icon: delprod ? const FaIcon(FontAwesomeIcons.moneyBillAlt, color: Colors.green,) : const FaIcon(
-                        FontAwesomeIcons.trashAlt,
-                        color: kWhiteColor,
-                      )),
+                      icon: delprod
+                          ? const FaIcon(
+                              FontAwesomeIcons.moneyBillAlt,
+                              color: Colors.green,
+                            )
+                          : const FaIcon(
+                              FontAwesomeIcons.trashAlt,
+                              color: kWhiteColor,
+                            )),
                 ),
                 decoration: const BoxDecoration(
                   color: kLightBackgroundColor,
@@ -134,9 +139,12 @@ class _VenteWidgetState extends State<VenteWidget>
                                               .nbProd = widget.selectedEvent
                                                   .panier[index].nbProd -
                                               1;
-                                          if(widget.selectedEvent.panier[index]
-                                              .nbProd == 0){
-                                            widget.selectedEvent.panier.remove(widget.selectedEvent.panier[index]);
+                                          if (widget.selectedEvent.panier[index]
+                                                  .nbProd ==
+                                              0) {
+                                            widget.selectedEvent.panier.remove(
+                                                widget.selectedEvent
+                                                    .panier[index]);
                                           }
                                         });
                                       },
@@ -155,98 +163,110 @@ class _VenteWidgetState extends State<VenteWidget>
               ),
             ],
           ),
-          if (openPrice) Transform.translate(
-                  offset: Offset(animation.value, 0),
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 0.0, bottom: 20.0),
-                    child: Container(
-                      width: 200.0,
-                      height: 60.0,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: kBtnSelectedColor,
-                        borderRadius: BorderRadius.circular(8.0),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: kLightBackgroundColor,
-                            spreadRadius: 8.0,
-                            blurRadius: 8.0,
-                          ),
-                        ],
+          if (openPrice)
+            SlideInRight(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 0.0, bottom: 20.0),
+                child: Container(
+                  width: 130.0,
+                  height: 60.0,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: kBtnSelectedColor,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10.0),
+                        bottomLeft: Radius.circular(10.0)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: kLightBackgroundColor,
+                        spreadRadius: 8.0,
+                        blurRadius: 8.0,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  openPrice = !openPrice;
-                                });
-                              },
-                              child: const FaIcon(
-                                FontAwesomeIcons.wallet,
-                                color: kWhiteColor,
-                                size: 30.0,
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 10.0,
-                            ),
-                            Text(widget.selectedEvent.getTotalPanier() + "€".toUpperCase(), style: const TextStyle(fontSize: 20.0, color: kWhiteColor),),
-                          ],
-                        ),
-                      ),
-                    ),
+                    ],
                   ),
-                ) else Padding(
-                  padding: const EdgeInsets.only(right: 0.0, bottom: 20.0),
-                  child: Container(
-                    width: openPrice ? 200.0 : 35.0,
-                    height: 60.0,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: openPrice ? kBtnSelectedColor : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8.0),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: kLightBackgroundColor,
-                          spreadRadius: 8.0,
-                          blurRadius: 8.0,
-                        ),
-                      ],
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(15.0),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         GestureDetector(
                           onTap: () {
-                            setState(() {
-                              openPrice = !openPrice;
-                              reverse = !reverse;
-                            });
                           },
                           child: const FaIcon(
-                            FontAwesomeIcons.caretLeft,
-                            color: kDefaultBackgroundColor,
-                            size: 50.0,
+                            FontAwesomeIcons.wallet,
+                            color: kWhiteColor,
+                            size: 30.0,
                           ),
                         ),
                         const SizedBox(
                           width: 10.0,
                         ),
-                        openPrice
-                            ? Text(widget.selectedEvent.getTotalPanier() + "€")
-                            : Container(),
+                        Text(
+                          widget.selectedEvent.getTotalPanier() +
+                              "€".toUpperCase(),
+                          style: const TextStyle(
+                              fontSize: 20.0, color: kWhiteColor),
+                        ),
                       ],
                     ),
                   ),
                 ),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(right: 0.0, bottom: 20.0),
+              child: Container(
+                width: 60.0,
+                height: 60.0,
+                alignment: Alignment.center,
+                child: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      openPrice = !openPrice;
+                    });
+                    Future.delayed(const Duration(seconds: 3), (){
+                      setState(() {
+                        openPrice = !openPrice;
+                      });
+                    });
+                  },
+                  icon: const FaIcon(
+                    FontAwesomeIcons.caretLeft,
+                    color: kDefaultBackgroundColor,
+                    size: 40.0,
+                  ),
+                ),
+                decoration: const BoxDecoration(
+                  color: kLightBackgroundColor,
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10.0),
+                      bottomLeft: Radius.circular(10.0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: kLightBackgroundColor,
+                      spreadRadius: 8.0,
+                      blurRadius: 8.0,
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );
   }
+
+  /*Padding(
+  padding: const EdgeInsets.only(right: 0.0, bottom: 20.0),
+  child: Container(
+  width: 60.0,
+  height: 60.0,
+  color: kBtnSelectedColor,
+  alignment: Alignment.center,
+  child: const FaIcon(FontAwesomeIcons.caretLeft, color: kDefaultBackgroundColor, size: 30.0,),
+  ),
+  )*/
 
   sortList() {
     int i;
@@ -280,10 +300,12 @@ class _VenteWidgetState extends State<VenteWidget>
                           Provider.of<EventProvider>(context, listen: false);
 
                       setState(() {
-                        if(widget.selectedEvent.panier.contains(widget.selectedEvent.listProduit[index])){
+                        if (widget.selectedEvent.panier.contains(
+                            widget.selectedEvent.listProduit[index])) {
                           widget.selectedEvent.panier[index].nbProd += 1;
-                        }else{
-                          widget.selectedEvent.panier.add(widget.selectedEvent.listProduit[index]);
+                        } else {
+                          widget.selectedEvent.panier
+                              .add(widget.selectedEvent.listProduit[index]);
                         }
                       });
                       provider.setEvent(widget.selectedEvent);
@@ -308,8 +330,8 @@ class _VenteWidgetState extends State<VenteWidget>
                               widget.selectedEvent.listProduit[index].title,
                               style: TextStyle(
                                 fontWeight: FontWeight.w400,
-                                fontSize: widget.selectedEvent.listProduit[index]
-                                            .title.length <
+                                fontSize: widget.selectedEvent
+                                            .listProduit[index].title.length <
                                         12
                                     ? 18.0
                                     : 13.0,
@@ -320,7 +342,9 @@ class _VenteWidgetState extends State<VenteWidget>
                             ),
                             GridTile(
                               child: Text(
-                                "€" + widget.selectedEvent.listProduit[index].price,
+                                "€" +
+                                    widget
+                                        .selectedEvent.listProduit[index].price,
                               ),
                             ),
                           ],
@@ -393,7 +417,9 @@ class _VenteWidgetState extends State<VenteWidget>
                     width: 10.0,
                   ),
                   Text(
-                    Utils.toDate(widget.selectedEvent.from) + " - " + widget.selectedEvent.title,
+                    Utils.toDate(widget.selectedEvent.from) +
+                        " - " +
+                        widget.selectedEvent.title,
                     style: const TextStyle(color: kWhiteColor, fontSize: 14),
                   ),
                 ],
@@ -404,12 +430,16 @@ class _VenteWidgetState extends State<VenteWidget>
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                buildMeteoButton(FontAwesomeIcons.solidSun, "sun", widget.selectedEvent.sun),
-                buildMeteoButton(FontAwesomeIcons.cloud, "cloud", widget.selectedEvent.cloud),
-                buildMeteoButton(FontAwesomeIcons.tint, "tint", widget.selectedEvent.tint),
-                buildMeteoButton(FontAwesomeIcons.pooStorm, "pooStorm", widget.selectedEvent.pooCloud),
-                buildMeteoButton(FontAwesomeIcons.cloudMeatball, "cloudMeatball",
-                    widget.selectedEvent.cloudSomething),
+                buildMeteoButton(
+                    FontAwesomeIcons.solidSun, "sun", widget.selectedEvent.sun),
+                buildMeteoButton(FontAwesomeIcons.cloud, "cloud",
+                    widget.selectedEvent.cloud),
+                buildMeteoButton(
+                    FontAwesomeIcons.tint, "tint", widget.selectedEvent.tint),
+                buildMeteoButton(FontAwesomeIcons.pooStorm, "pooStorm",
+                    widget.selectedEvent.pooCloud),
+                buildMeteoButton(FontAwesomeIcons.cloudMeatball,
+                    "cloudMeatball", widget.selectedEvent.cloudSomething),
               ],
             )
           ],
@@ -423,42 +453,38 @@ class _VenteWidgetState extends State<VenteWidget>
       onPressed: () {
         switch (name) {
           case "sun":
-            final provider =
-            Provider.of<EventProvider>(context, listen: false);
+            final provider = Provider.of<EventProvider>(context, listen: false);
             setState(() {
               widget.selectedEvent.sun = !widget.selectedEvent.sun;
             });
             provider.setEvent(widget.selectedEvent);
             break;
           case "cloud":
-            final provider =
-            Provider.of<EventProvider>(context, listen: false);
+            final provider = Provider.of<EventProvider>(context, listen: false);
             setState(() {
               widget.selectedEvent.cloud = !widget.selectedEvent.cloud;
             });
             provider.setEvent(widget.selectedEvent);
             break;
           case "tint":
-            final provider =
-            Provider.of<EventProvider>(context, listen: false);
+            final provider = Provider.of<EventProvider>(context, listen: false);
             setState(() {
               widget.selectedEvent.tint = !widget.selectedEvent.tint;
             });
             provider.setEvent(widget.selectedEvent);
             break;
           case "pooStorm":
-            final provider =
-            Provider.of<EventProvider>(context, listen: false);
+            final provider = Provider.of<EventProvider>(context, listen: false);
             setState(() {
               widget.selectedEvent.pooCloud = !widget.selectedEvent.pooCloud;
             });
             provider.setEvent(widget.selectedEvent);
             break;
           case "cloudMeatball":
-            final provider =
-            Provider.of<EventProvider>(context, listen: false);
+            final provider = Provider.of<EventProvider>(context, listen: false);
             setState(() {
-              widget.selectedEvent.cloudSomething = !widget.selectedEvent.cloudSomething;
+              widget.selectedEvent.cloudSomething =
+                  !widget.selectedEvent.cloudSomething;
             });
             provider.setEvent(widget.selectedEvent);
             break;
