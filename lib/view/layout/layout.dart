@@ -1,7 +1,9 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:suividevente/utils/constants.dart';
 import 'package:suividevente/utils/menu_item.dart';
+import 'package:suividevente/view/dashboard/dashboard.dart';
 import 'package:suividevente/view/home/calendar_widget.dart';
 
 class Layout extends StatefulWidget {
@@ -17,11 +19,13 @@ class _LayoutState extends State<Layout> {
     var size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: kDefaultBackgroundColor,
-      body: Stack(
-        children: [
-          sideMenu(size),
-          const CalendarWidget(),
-        ],
+      body: FadeIn(
+        child: Stack(
+          children: [
+            sideMenu(size),
+            const CalendarWidget(),
+          ],
+        ),
       ),
     );
   }
@@ -29,20 +33,28 @@ class _LayoutState extends State<Layout> {
   Widget sideMenu(Size size) {
     return Container(
       color: kDefaultBackgroundColor,
-      padding: const EdgeInsets.all(10.0),
-      alignment: Alignment.centerLeft,
-      child: Column(
+      padding: const EdgeInsets.only(top: 50.0, left: 10.0, right: 10.0, bottom: 10.0),
+      alignment: Alignment.topCenter,
+      child: Row(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           MenuItem(
             title: "Statistiques",
-            icon: const FaIcon(FontAwesomeIcons.chartBar),
+            icon: const FaIcon(FontAwesomeIcons.chartBar, color: kWhiteColor, size: 15.0,),
             func: () {},
           ),
           MenuItem(
             title: "Calendriers",
-            icon: const FaIcon(FontAwesomeIcons.calendar),
+            icon: const FaIcon(FontAwesomeIcons.calendar, color: kWhiteColor, size: 15.0,),
             func: () {},
+          ),
+          MenuItem(
+            title: "Dashboard",
+            icon: const FaIcon(FontAwesomeIcons.user, color: kWhiteColor, size: 15.0,),
+            func: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const Dashboard()));
+            },
           )
         ],
       ),

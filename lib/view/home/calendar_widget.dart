@@ -1,9 +1,19 @@
+import 'dart:convert';
+
+import 'package:animate_do/animate_do.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:suividevente/controller/event_databases/event_databases.dart';
+import 'package:suividevente/controller/event_provider_data/event_provider_data.dart';
 import 'package:suividevente/model/event_data_source.dart';
 import 'package:suividevente/model/event_provider.dart';
+import 'package:suividevente/model/my_event.dart';
+import 'package:suividevente/model/product.dart';
 import 'package:suividevente/utils/constants.dart';
 import 'package:suividevente/view/home/components/addEvent/add_event.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -18,6 +28,9 @@ class CalendarWidget extends StatefulWidget {
 }
 
 class _CalendarWidgetState extends State<CalendarWidget> {
+  final databaseReference = FirebaseFirestore.instance;
+  EventDataSource? events;
+
   final _calendarView = CalendarView.month;
   final _initialDate = DateTime.now();
   final _cellBorder = Colors.transparent;
@@ -31,6 +44,11 @@ class _CalendarWidgetState extends State<CalendarWidget> {
   @override
   void initState() {
     // TODO: implement initState
+    getDataFromFireStore().then((results) {
+      SchedulerBinding.instance!.addPostFrameCallback((_intialDate) {
+        setState(() {});
+      });
+    });
     super.initState();
   }
 
@@ -40,50 +58,50 @@ class _CalendarWidgetState extends State<CalendarWidget> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       transform: Matrix4.translationValues(tranx, trany, 0)..scale(scale),
-      child: Container(
-        color: kDefaultBackgroundColor,
-        child: LayoutBuilder(
-            builder: (context, BoxConstraints viewportConstraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: viewportConstraints.maxHeight,
-              ),
-              child: Container(
-                width: size.width,
-                height: size.height,
-                decoration: BoxDecoration(
-                  color: kDefaultBackgroundColor,
-                  borderRadius: menuOpen
-                      ? BorderRadius.circular(20.0)
-                      : BorderRadius.circular(0.0),
+      child: ZoomIn(
+        child: Container(
+          color: kDefaultBackgroundColor,
+          child: LayoutBuilder(
+              builder: (context, BoxConstraints viewportConstraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: viewportConstraints.maxHeight,
                 ),
-                child: SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      myAppBar(),
-                      calendar(),
-                      bottomMenu(),
-                    ],
+                child: Container(
+                  width: size.width,
+                  height: size.height,
+                  decoration: BoxDecoration(
+                    color: kDefaultBackgroundColor,
+                    borderRadius: menuOpen
+                        ? BorderRadius.circular(20.0)
+                        : BorderRadius.circular(0.0),
+                  ),
+                  child: SafeArea(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        myAppBar(),
+                        calendar(),
+                        bottomMenu(),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }
 
   Widget calendar() {
-    final events = Provider.of<EventProvider>(context).events;
-
     return Expanded(
       child: SfCalendar(
         view: _calendarView,
         timeZone: "Central Europe Standard Time",
-        dataSource: EventDataSource(events),
+        dataSource: events,
         initialSelectedDate: _initialDate,
         cellBorderColor: _cellBorder,
         firstDayOfWeek: _firstDayOfWeek,
@@ -115,7 +133,8 @@ class _CalendarWidgetState extends State<CalendarWidget> {
         ),
         viewHeaderHeight: 40.0,
         todayHighlightColor: kLightBackgroundColor,
-        appointmentBuilder: (BuildContext context, CalendarAppointmentDetails details){
+        appointmentBuilder:
+            (BuildContext context, CalendarAppointmentDetails details) {
           return Center(
             child: Container(
               color: details.appointments.first.color,
@@ -123,25 +142,19 @@ class _CalendarWidgetState extends State<CalendarWidget> {
           );
         },
         monthViewSettings: const MonthViewSettings(
-          appointmentDisplayMode: MonthAppointmentDisplayMode.none,
-          appointmentDisplayCount: 2,
-          showTrailingAndLeadingDates: false,
-          monthCellStyle: MonthCellStyle(
-            trailingDatesTextStyle: TextStyle(
-              color: kLightBackgroundColor
-            ),
-            textStyle: TextStyle(
-              color: kWhiteColor,
-            ),
-            leadingDatesTextStyle: TextStyle(
-                color: kLightBackgroundColor
-            ),
-          )
-        ),
-        monthCellBuilder: (BuildContext buildContext, MonthCellDetails details){
-          final provider = Provider.of<EventProvider>(context);
-          provider.setDate(details.date);
-          if(details.appointments.isNotEmpty){
+            appointmentDisplayMode: MonthAppointmentDisplayMode.none,
+            appointmentDisplayCount: 2,
+            showTrailingAndLeadingDates: false,
+            monthCellStyle: MonthCellStyle(
+              trailingDatesTextStyle: TextStyle(color: kLightBackgroundColor),
+              textStyle: TextStyle(
+                color: kWhiteColor,
+              ),
+              leadingDatesTextStyle: TextStyle(color: kLightBackgroundColor),
+            )),
+        monthCellBuilder:
+            (BuildContext buildContext, MonthCellDetails details) {
+          if (details.appointments.isNotEmpty) {
             return Container(
               //color: kRedColor,
               height: 30.0,
@@ -161,7 +174,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
-                      children: details.appointments.map((e){
+                      children: details.appointments.map((e) {
                         final dynamic occurrenceAppointment = e;
                         return Container(
                           width: 13.0,
@@ -191,19 +204,42 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             ),
           );
         },
-        onTap: (details) {
-          final provider = Provider.of<EventProvider>(context, listen: false);
-
-          provider.setDate(details.date!);
-          showModalBottomSheet(
-              context: context, builder: (context) => const TasksWidget());
+        onTap: (details) async {
+          if (details.appointments!.isNotEmpty) {
+            await EventDatabaseService().updateEvent(
+              details.appointments!.first.uid,
+              details.appointments!.first.title,
+              details.appointments!.first.description,
+              details.appointments!.first.from,
+              details.appointments!.first.to,
+              details.appointments!.first.color.value,
+              details.appointments!.first.isAllDay,
+              details.appointments!.first.sun,
+              details.appointments!.first.cloud,
+              details.appointments!.first.tint,
+              details.appointments!.first.pooCloud,
+              details.appointments!.first.cloudSomething,
+              details.appointments!.first.panierCount,
+            );
+            showModalBottomSheet(
+              context: context,
+              builder: (context) => TasksWidget(
+                initialDate: details.date!, title: details.appointments!.first.title,
+              ),
+            );
+          } else {
+            Text("RAF");
+          }
         },
         onLongPress: (details) {
           final provider = Provider.of<EventProvider>(context, listen: false);
 
           provider.setDate(details.date!);
           showModalBottomSheet(
-              context: context, builder: (context) => const TasksWidget());
+              context: context,
+              builder: (context) => TasksWidget(
+                    initialDate: details.date!, title: details.appointments!.first.uid,
+                  ));
         },
       ),
     );
@@ -325,5 +361,30 @@ class _CalendarWidgetState extends State<CalendarWidget> {
         ),
       ),
     );
+  }
+
+  Future<void> getDataFromFireStore() async {
+    var snapShotsValue = await databaseReference.collection("events").get();
+
+    List<MyEvent> list = snapShotsValue.docs.map((e) {
+      return MyEvent(
+        e.data()['from'].toDate(),
+        e.data()['title'],
+        Color(int.parse(e.data()['color'])),
+        e.data()['description'],
+        e.data()['from'].toDate(),
+        e.data()['to'].toDate(),
+        e.data()['isAllDay'],
+        e.data()['sun'],
+        e.data()['cloud'],
+        e.data()['tint'],
+        e.data()['pooStorm'],
+        e.data()['cloudSomething'],
+        e.data()['panier'],
+      );
+    }).toList();
+    setState(() {
+      events = EventDataSource(list);
+    });
   }
 }

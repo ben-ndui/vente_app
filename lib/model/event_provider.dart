@@ -29,7 +29,7 @@ class EventProvider extends ChangeNotifier{
           element.panier = event.panier;
           return true;
         }
-        return false;
+        return true;
       });
     }
     notifyListeners();

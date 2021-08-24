@@ -2,6 +2,8 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:suividevente/controller/event_databases/event_databases.dart';
+import 'package:suividevente/controller/product_databases/product_database.dart';
 import 'package:suividevente/model/event_provider.dart';
 import 'package:suividevente/model/meteo.dart';
 import 'package:suividevente/model/my_event.dart';
@@ -11,8 +13,9 @@ import 'package:suividevente/utils/utils.dart';
 
 class VenteWidget extends StatefulWidget {
   final MyEvent selectedEvent;
+  final String title;
 
-  const VenteWidget({Key? key, required this.selectedEvent}) : super(key: key);
+  const VenteWidget({Key? key, required this.selectedEvent, required this.title}) : super(key: key);
 
   @override
   _VenteWidgetState createState() => _VenteWidgetState();
@@ -55,13 +58,15 @@ class _VenteWidgetState extends State<VenteWidget>
     var size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: kDefaultBackgroundColor,
-      body: SafeArea(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            leftPanel(size),
-            rightPanel(context),
-          ],
+      body: BounceInDown(
+        child: SafeArea(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              leftPanel(size),
+              rightPanel(context),
+            ],
+          ),
         ),
       ),
     );
@@ -87,13 +92,17 @@ class _VenteWidgetState extends State<VenteWidget>
                         });
                       },
                       icon: delprod
-                          ? const FaIcon(
-                              FontAwesomeIcons.moneyBillAlt,
-                              color: Colors.green,
+                          ? FadeIn(
+                              child: const FaIcon(
+                                FontAwesomeIcons.moneyBillAlt,
+                                color: Colors.green,
+                              ),
                             )
-                          : const FaIcon(
-                              FontAwesomeIcons.trashAlt,
-                              color: kWhiteColor,
+                          : FadeOut(
+                              child: const FaIcon(
+                                FontAwesomeIcons.trashAlt,
+                                color: kWhiteColor,
+                              ),
                             )),
                 ),
                 decoration: const BoxDecoration(
@@ -113,50 +122,55 @@ class _VenteWidgetState extends State<VenteWidget>
                     height: MediaQuery.of(context).size.height,
                     color: kLightBackgroundColor,
                     padding: const EdgeInsets.all(12.0),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: widget.selectedEvent.panier.length,
-                      itemBuilder: (context, index) {
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 400),
-                          child: Card(
-                            elevation: 0.0,
-                            color: kLightBackgroundColor,
-                            child: ListTile(
-                              leading: Text(
-                                "${widget.selectedEvent.panier[index].nbProd == 0 ? widget.selectedEvent.panier[index].nbProd = 1 : widget.selectedEvent.panier[index].nbProd}",
-                                style: const TextStyle(color: kWhiteColor),
+                    child: StreamBuilder<List<Product>>(
+                      stream: EventDatabaseService(uid: widget.title).allPanier,
+                      builder: (context, snapshot) {
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 400),
+                              child: Card(
+                                elevation: 0.0,
+                                color: kLightBackgroundColor,
+                                child: ListTile(
+                                  leading: Text(
+                                    "${snapshot.data![index].nbProd == 0 ? snapshot.data![index].nbProd = 1 : snapshot.data![index].nbProd}",
+                                    style: const TextStyle(color: kWhiteColor),
+                                  ),
+                                  title: Text(
+                                    snapshot.data![index].title,
+                                    style: const TextStyle(color: kWhiteColor),
+                                  ),
+                                  trailing: delprod
+                                      ? IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              widget.selectedEvent.panier[index]
+                                                  .nbProd = widget.selectedEvent
+                                                      .panier[index].nbProd -
+                                                  1;
+                                              if (widget.selectedEvent.panier[index]
+                                                      .nbProd ==
+                                                  0) {
+                                                widget.selectedEvent.panier.remove(
+                                                    widget.selectedEvent
+                                                        .panier[index]);
+                                              }
+                                            });
+                                          },
+                                          icon: const FaIcon(
+                                            FontAwesomeIcons.times,
+                                            color: kRedColor,
+                                          ))
+                                      : null,
+                                ),
                               ),
-                              title: Text(
-                                widget.selectedEvent.panier[index].title,
-                                style: const TextStyle(color: kWhiteColor),
-                              ),
-                              trailing: delprod
-                                  ? IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          widget.selectedEvent.panier[index]
-                                              .nbProd = widget.selectedEvent
-                                                  .panier[index].nbProd -
-                                              1;
-                                          if (widget.selectedEvent.panier[index]
-                                                  .nbProd ==
-                                              0) {
-                                            widget.selectedEvent.panier.remove(
-                                                widget.selectedEvent
-                                                    .panier[index]);
-                                          }
-                                        });
-                                      },
-                                      icon: const FaIcon(
-                                        FontAwesomeIcons.times,
-                                        color: kRedColor,
-                                      ))
-                                  : null,
-                            ),
-                          ),
+                            );
+                          },
                         );
-                      },
+                      }
                     ),
                   ),
                 ),
@@ -190,8 +204,7 @@ class _VenteWidgetState extends State<VenteWidget>
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () {
-                          },
+                          onTap: () {},
                           child: const FaIcon(
                             FontAwesomeIcons.wallet,
                             color: kWhiteColor,
@@ -205,7 +218,9 @@ class _VenteWidgetState extends State<VenteWidget>
                           widget.selectedEvent.getTotalPanier() +
                               "€".toUpperCase(),
                           style: const TextStyle(
-                              fontSize: 20.0, color: kWhiteColor),
+                            fontSize: 20.0,
+                            color: kWhiteColor,
+                          ),
                         ),
                       ],
                     ),
@@ -214,41 +229,62 @@ class _VenteWidgetState extends State<VenteWidget>
               ),
             )
           else
-            Padding(
-              padding: const EdgeInsets.only(right: 0.0, bottom: 20.0),
-              child: Container(
-                width: 60.0,
-                height: 60.0,
-                alignment: Alignment.center,
-                child: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      openPrice = !openPrice;
-                    });
-                    Future.delayed(const Duration(seconds: 3), (){
-                      setState(() {
-                        openPrice = !openPrice;
-                      });
-                    });
-                  },
-                  icon: const FaIcon(
-                    FontAwesomeIcons.caretLeft,
-                    color: kDefaultBackgroundColor,
-                    size: 40.0,
+            SlideInLeft(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 0.0, bottom: 20.0),
+                child: Container(
+                  width: openPrice ? 130.0 : 60,
+                  height: 60.0,
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            openPrice = !openPrice;
+                          });
+                          Future.delayed(const Duration(seconds: 3), () {
+                            setState(() {
+                              openPrice = !openPrice;
+                            });
+                          });
+                        },
+                        icon: const FaIcon(
+                          FontAwesomeIcons.caretLeft,
+                          color: kDefaultBackgroundColor,
+                          size: 40.0,
+                        ),
+                      ),
+                      openPrice
+                          ? Future.delayed(const Duration(seconds: 10), () {
+                              return FadeOut(
+                                child: Text(
+                                  widget.selectedEvent.getTotalPanier() +
+                                      "€".toUpperCase(),
+                                  style: const TextStyle(
+                                    fontSize: 20.0,
+                                    color: kWhiteColor,
+                                  ),
+                                ),
+                              );
+                            }) as Widget
+                          : Container(),
+                    ],
                   ),
-                ),
-                decoration: const BoxDecoration(
-                  color: kLightBackgroundColor,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10.0),
-                      bottomLeft: Radius.circular(10.0)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: kLightBackgroundColor,
-                      spreadRadius: 8.0,
-                      blurRadius: 8.0,
-                    ),
-                  ],
+                  decoration: const BoxDecoration(
+                    color: kLightBackgroundColor,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10.0),
+                        bottomLeft: Radius.circular(10.0)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: kLightBackgroundColor,
+                        spreadRadius: 8.0,
+                        blurRadius: 8.0,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -287,73 +323,80 @@ class _VenteWidgetState extends State<VenteWidget>
               width: size.width,
               height: size.height,
               padding: const EdgeInsets.all(10.0),
-              child: GridView.builder(
-                shrinkWrap: true,
-                itemCount: widget.selectedEvent.listProduit.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                ),
-                itemBuilder: (BuildContext context, int index) {
-                  return GestureDetector(
-                    onTap: () {
-                      final provider =
-                          Provider.of<EventProvider>(context, listen: false);
+              child: StreamBuilder<List<Product>>(
+                  stream: ProductDatabaseService().allProducts,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                          child: Text(
+                        "Vous n'avez aucun produit en stock actuellement !",
+                        style: TextStyle(color: kWhiteColor),
+                      ));
+                    }
+                    final productList = snapshot.data;
 
-                      setState(() {
-                        if (widget.selectedEvent.panier.contains(
-                            widget.selectedEvent.listProduit[index])) {
-                          widget.selectedEvent.panier[index].nbProd += 1;
-                        } else {
-                          widget.selectedEvent.panier
-                              .add(widget.selectedEvent.listProduit[index]);
-                        }
-                      });
-                      provider.setEvent(widget.selectedEvent);
-                    },
-                    child: SizedBox(
-                      width: 300.0,
-                      height: 100.0,
-                      child: Card(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Image.asset(
-                              widget.selectedEvent.listProduit[index].img,
-                              fit: BoxFit.cover,
-                              width: size.width,
-                              height: 115.0,
-                            ),
-                            const SizedBox(
-                              height: 6.0,
-                            ),
-                            Text(
-                              widget.selectedEvent.listProduit[index].title,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w400,
-                                fontSize: widget.selectedEvent
-                                            .listProduit[index].title.length <
-                                        12
-                                    ? 18.0
-                                    : 13.0,
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 1.0,
-                            ),
-                            GridTile(
-                              child: Text(
-                                "€" +
-                                    widget
-                                        .selectedEvent.listProduit[index].price,
-                              ),
-                            ),
-                          ],
-                        ), //just for testing, will fill with image later
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      itemCount: productList!.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
                       ),
-                    ),
-                  );
-                },
-              ),
+                      itemBuilder: (BuildContext context, int index) {
+                        return GestureDetector(
+                          onTap: () async {
+                            await EventDatabaseService().updateEventPanier(
+                              widget.title,
+                              productList[index].uid,
+                              productList[index].title,
+                              productList[index].price,
+                              productList[index].img,
+                            );
+                          },
+                          child: SizedBox(
+                            width: 300.0,
+                            height: 100.0,
+                            child: Card(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Image.asset(
+                                    productList[index].img == ""
+                                        ? "assets/background/back1.jpeg"
+                                        : productList[index].img,
+                                    fit: BoxFit.cover,
+                                    width: size.width,
+                                    height: 115.0,
+                                  ),
+                                  const SizedBox(
+                                    height: 6.0,
+                                  ),
+                                  Text(
+                                    productList[index].title,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize:
+                                          productList[index].title.length < 12
+                                              ? 18.0
+                                              : 13.0,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 1.0,
+                                  ),
+                                  GridTile(
+                                    child: Text(
+                                      "€" + productList[index].price,
+                                    ),
+                                  ),
+                                ],
+                              ), //just for testing, will fill with image later
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }),
             ),
           ],
         ),

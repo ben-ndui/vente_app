@@ -2,14 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:suividevente/model/product.dart';
 
 class ProductDatabaseService {
-  String uid;
+  var uid;
   final FirebaseFirestore _firebaseInstance = FirebaseFirestore.instance;
 
   /// Collection user
-  final CollectionReference userCollection =
+  final CollectionReference productCollection =
       FirebaseFirestore.instance.collection("products");
 
-  ProductDatabaseService({required this.uid});
+  ProductDatabaseService({this.uid});
 
   /// Permet de récupérer les donnée de n'importe quel collection de firebase
   Future getAllProductsFromFirebase() async {
@@ -20,7 +20,7 @@ class ProductDatabaseService {
 
   /// Save user
   Future<void> saveProduct(String? uid, String? title, String? price, String? img) async {
-    return await userCollection.doc(uid).set(
+    return await _firebaseInstance.collection("products").doc(uid).set(
       {
         'uid': uid,
         'title': title,
@@ -28,11 +28,11 @@ class ProductDatabaseService {
         'img': img,
         'searchKey': title!.substring(0, 1),
       },
-    );
+    ).then((value) => print("Ajout réussi")).catchError((error) => print("Failed to add user: $error"));
   }
 
   Future<void> updateProductInfo(String? uid, String? title, String? price,String? img) async {
-    return await userCollection.doc(uid).update(
+    return await productCollection.doc(uid).update(
       {
         'uid': uid,
         'title': title,
@@ -43,7 +43,7 @@ class ProductDatabaseService {
     );
   }
 
-  Product _userFromSnapShot(DocumentSnapshot snapshot) {
+  Product _productFromSnapShot(DocumentSnapshot snapshot) {
     final userData = (snapshot.data() as dynamic);
     return Product(
       uid: userData["uid"],
@@ -54,18 +54,18 @@ class ProductDatabaseService {
   }
 
   /// Stream to get current user
-  Stream<Product> get user {
-    return userCollection.doc(uid).snapshots().map(_userFromSnapShot);
+  Stream<Product> get product {
+    return productCollection.doc(uid).snapshots().map(_productFromSnapShot);
   }
 
   /// Stream list to get all users
-  Stream<List<Product>> get allUser {
-    return userCollection.snapshots().map(_userListFromSnapShot);
+  Stream<List<Product>> get allProducts {
+    return productCollection.snapshots().map(_productListFromSnapShot);
   }
 
   searchByName(searchField) {
     return _firebaseInstance
-        .collection('users')
+        .collection('products')
         .where('searchKey',
             isEqualTo: searchField.substring(0, 1).toUpperCase())
         .get();
@@ -79,7 +79,7 @@ class ProductDatabaseService {
         .get();
   }
 
-  List<Product> _userListFromSnapShot(QuerySnapshot snapshot) {
-    return snapshot.docs.map((doc) => _userFromSnapShot(doc)).toList();
+  List<Product> _productListFromSnapShot(QuerySnapshot snapshot) {
+    return snapshot.docs.map((doc) => _productFromSnapShot(doc)).toList();
   }
 }
