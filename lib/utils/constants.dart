@@ -12,4 +12,7 @@ const Color kDarkBlueColor = Color(0xFF264C78);
 const Color kRedColor = Color(0xFFED4741);
 const Color kBtnSelectedColor = Color(0xFF39506A);
 
+const Color kLoaderColors1 = Color(0xFFe8e8e4);
+const Color kLoaderColors2 = Color(0xFFd8e2dc);
+
 const titleSize = 18.0;

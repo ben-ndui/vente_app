@@ -19,25 +19,27 @@ class ProductDatabaseService {
   }
 
   /// Save user
-  Future<void> saveProduct(String? uid, String? title, String? price, String? img) async {
+  Future<void> saveProduct(String? uid, String? title, String? price, String? img, int? nbProd) async {
     return await _firebaseInstance.collection("products").doc(uid).set(
       {
         'uid': uid,
         'title': title,
         'price': price,
         'img': img,
+        'nbProd': '$nbProd',
         'searchKey': title!.substring(0, 1),
       },
     ).then((value) => print("Ajout réussi")).catchError((error) => print("Failed to add user: $error"));
   }
 
-  Future<void> updateProductInfo(String? uid, String? title, String? price,String? img) async {
-    return await productCollection.doc(uid).update(
+  Future<void> updateProductInfo(String? uid, String? title, String? price,String? img, int? prodNb) async {
+    return await _firebaseInstance.collection("products").doc(uid).update(
       {
         'uid': uid,
         'title': title,
         'price': price,
         'img': img,
+        'nbProd': '$prodNb',
         'searchKey': title!.substring(0, 1),
       },
     );
@@ -50,6 +52,7 @@ class ProductDatabaseService {
       title: userData["title"],
       price: userData["price"],
       img: userData["img"],
+      nbProd: userData["nbProd"],
     );
   }
 

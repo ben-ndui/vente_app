@@ -1,10 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:provider/provider.dart';
 import 'package:suividevente/model/event_data_source.dart';
-import 'package:suividevente/model/event_provider.dart';
 import 'package:suividevente/model/my_event.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
@@ -13,8 +10,11 @@ import '../vente_widget.dart';
 class TasksWidget extends StatefulWidget {
   final DateTime initialDate;
   final String title;
+  final EventDataSource events;
 
-  const TasksWidget({Key? key, required this.initialDate, required this.title}) : super(key: key);
+
+  const TasksWidget({Key? key, required this.initialDate, required this.title, required this.events})
+      : super(key: key);
 
   @override
   _TasksWidgetState createState() => _TasksWidgetState();
@@ -30,21 +30,15 @@ class _TasksWidgetState extends State<TasksWidget> {
   void initState() {
     // TODO: implement initState
     _initD = widget.initialDate;
-    getDataFromFireStore().then((results) {
-      SchedulerBinding.instance!.addPostFrameCallback((_initD) {
-        setState(() {});
-      });
-    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return FadeIn(
       child: SfCalendar(
         view: CalendarView.day,
-        dataSource: events,
+        dataSource: widget.events,
         initialDisplayDate: _initD,
         appointmentBuilder: appointmentBuilder,
       ),
@@ -74,8 +68,15 @@ class _TasksWidgetState extends State<TasksWidget> {
       BuildContext context, CalendarAppointmentDetails details) {
     final eventy = details.appointments.first;
     return GestureDetector(
-      onTap: (){
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => VenteWidget(selectedEvent: eventy, title: widget.title,)));
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => VenteWidget(
+              selectedEvent: eventy,
+              title: widget.title,
+            ),
+          ),
+        );
       },
       child: Container(
         width: details.bounds.width,
@@ -111,6 +112,7 @@ class _TasksWidgetState extends State<TasksWidget> {
         e.data()['pooStorm'],
         e.data()['cloudSomething'],
         e.data()['panier'],
+        e.data()['month'],
       );
     }).toList();
     setState(() {

@@ -8,7 +8,7 @@ class Product{
   int nbProd = 1;
   double total = 0.0;
 
-  Product({required this.uid, required this.title, required this.price, required this.img});
+  Product({required this.uid, required this.title, required this.price, required this.img, required this.nbProd});
 
   double getTotal(){
     return nbProd * total;

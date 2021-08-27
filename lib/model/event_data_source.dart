@@ -4,9 +4,8 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 import 'my_event.dart';
 
-class EventDataSource extends CalendarDataSource{
-
-  EventDataSource(List<MyEvent> appointments){
+class EventDataSource extends CalendarDataSource {
+  EventDataSource(List<MyEvent> appointments) {
     this.appointments = appointments;
   }
 
@@ -33,7 +32,14 @@ class EventDataSource extends CalendarDataSource{
   @override
   Color getColor(int index) {
     // TODO: implement getColor
-    return getEvent(index).panier.isNotEmpty ? getEvent(index).color : kLightBackgroundColor;
+    return getEvent(index).panier.isEmpty &&
+            getEvent(index).sun == false &&
+            getEvent(index).cloud == false &&
+            getEvent(index).tint == false &&
+            getEvent(index).pooCloud == false &&
+            getEvent(index).cloudSomething == false
+        ? getEvent(index).color
+        : kLightBackgroundColor;
   }
 
   @override

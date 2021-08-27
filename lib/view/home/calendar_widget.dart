@@ -1,19 +1,14 @@
-import 'dart:convert';
-
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:suividevente/controller/event_databases/event_databases.dart';
-import 'package:suividevente/controller/event_provider_data/event_provider_data.dart';
 import 'package:suividevente/model/event_data_source.dart';
 import 'package:suividevente/model/event_provider.dart';
 import 'package:suividevente/model/my_event.dart';
-import 'package:suividevente/model/product.dart';
 import 'package:suividevente/utils/constants.dart';
 import 'package:suividevente/view/home/components/addEvent/add_event.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -178,7 +173,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                         final dynamic occurrenceAppointment = e;
                         return Container(
                           width: 13.0,
-                          height: 15.0,
+                          height: 13.0,
                           margin: const EdgeInsets.all(2.0),
                           decoration: BoxDecoration(
                             color: occurrenceAppointment.getColor,
@@ -205,6 +200,9 @@ class _CalendarWidgetState extends State<CalendarWidget> {
           );
         },
         onTap: (details) async {
+          /*final provider = Provider.of<EventProvider>(context, listen: false);
+          provider.setDate(details.date!);*/
+
           if (details.appointments!.isNotEmpty) {
             await EventDatabaseService().updateEvent(
               details.appointments!.first.uid,
@@ -220,11 +218,14 @@ class _CalendarWidgetState extends State<CalendarWidget> {
               details.appointments!.first.pooCloud,
               details.appointments!.first.cloudSomething,
               details.appointments!.first.panierCount,
+              details.appointments!.first.month,
             );
             showModalBottomSheet(
               context: context,
               builder: (context) => TasksWidget(
-                initialDate: details.date!, title: details.appointments!.first.title,
+                initialDate: details.date!,
+                title: details.appointments!.first.title,
+                events: events!,
               ),
             );
           } else {
@@ -236,10 +237,13 @@ class _CalendarWidgetState extends State<CalendarWidget> {
 
           provider.setDate(details.date!);
           showModalBottomSheet(
-              context: context,
-              builder: (context) => TasksWidget(
-                    initialDate: details.date!, title: details.appointments!.first.uid,
-                  ));
+            context: context,
+            builder: (context) => TasksWidget(
+              initialDate: details.date!,
+              title: details.appointments!.first.title,
+              events: events!,
+            ),
+          );
         },
       ),
     );
@@ -364,7 +368,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
   }
 
   Future<void> getDataFromFireStore() async {
-    var snapShotsValue = await databaseReference.collection("events").get();
+    var snapShotsValue = await databaseReference.collection("events").doc('${_initialDate.month}').collection("all").get();
 
     List<MyEvent> list = snapShotsValue.docs.map((e) {
       return MyEvent(
@@ -381,6 +385,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
         e.data()['pooStorm'],
         e.data()['cloudSomething'],
         e.data()['panier'],
+        e.data()['month'],
       );
     }).toList();
     setState(() {

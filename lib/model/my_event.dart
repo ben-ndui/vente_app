@@ -19,6 +19,8 @@ class MyEvent {
   bool cloudSomething = false;
   double panierCount;
 
+  int month;
+
   List<Product> panier = [];
 
   List<Product> listProduit = [];
@@ -39,6 +41,7 @@ class MyEvent {
     this.pooCloud,
     this.cloudSomething,
     this.panierCount,
+    this.month,
   );
 
   displayProduct() {

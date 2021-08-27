@@ -3,16 +3,12 @@ import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
 import 'package:suividevente/controller/event_databases/event_databases.dart';
-import 'package:suividevente/controller/event_provider_data/event_provider_data.dart';
-import 'package:suividevente/model/event_provider.dart';
 import 'package:suividevente/model/meteo.dart';
 import 'package:suividevente/model/my_event.dart';
 import 'package:suividevente/model/product.dart';
 import 'package:suividevente/utils/constants.dart';
 import 'package:suividevente/utils/utils.dart';
-import 'package:suividevente/view/home/calendar_widget.dart';
 import 'package:suividevente/view/layout/layout.dart';
 
 class AddEvent extends StatefulWidget {
@@ -68,103 +64,105 @@ class _AddEventState extends State<AddEvent> {
     return Scaffold(
       backgroundColor: kDefaultBackgroundColor,
       body: BounceInDown(
-        child: Stack(
-          alignment: AlignmentDirectional.center,
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        child: const CloseButton(
-                          color: kDefaultBackgroundColor,
-                        ),
-                        decoration: BoxDecoration(
-                          color: kWhiteColor,
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        margin: const EdgeInsets.only(top: 30.0, left: 30.0),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 8,
-                ),
-                Center(
-                  child: Container(
-                    width: 400.0,
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                      color: kWhiteColor,
-                      borderRadius: BorderRadius.circular(10.0),
-                      boxShadow: const [
-                        BoxShadow(
+        child: SingleChildScrollView(
+          child: Stack(
+            alignment: AlignmentDirectional.center,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          child: const CloseButton(
+                            color: kDefaultBackgroundColor,
+                          ),
+                          decoration: BoxDecoration(
                             color: kWhiteColor,
-                            blurRadius: 8.0,
-                            spreadRadius: 1.0),
+                            borderRadius: BorderRadius.circular(4.0),
+                          ),
+                          margin: const EdgeInsets.only(top: 30.0, left: 30.0),
+                        ),
                       ],
                     ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          buildTitle(),
-                          const SizedBox(
-                            height: 12.0,
-                          ),
-                          buildDateTimePickers(),
-                          const SizedBox(
-                            height: 12.0,
-                          ),
-                          buildMeteo(),
-                          const SizedBox(
-                            height: 12.0,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: TextButton.icon(
-                              onPressed: () {
-                                saveEventForm();
-                              },
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 8,
+                  ),
+                  Center(
+                    child: Container(
+                      width: 400.0,
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        color: kWhiteColor,
+                        borderRadius: BorderRadius.circular(10.0),
+                        boxShadow: const [
+                          BoxShadow(
+                              color: kWhiteColor,
+                              blurRadius: 8.0,
+                              spreadRadius: 1.0),
+                        ],
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            buildTitle(),
+                            const SizedBox(
+                              height: 12.0,
+                            ),
+                            buildDateTimePickers(),
+                            const SizedBox(
+                              height: 12.0,
+                            ),
+                            buildMeteo(),
+                            const SizedBox(
+                              height: 12.0,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: TextButton.icon(
+                                onPressed: () {
+                                  saveEventForm();
+                                },
 
-                              /// CALLBACK ACTION HERE
-                              icon: const FaIcon(
-                                FontAwesomeIcons.check,
-                                color: kWhiteColor,
-                              ),
-                              label: const Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: Text(
-                                  "Enregistrer",
-                                  style: TextStyle(
-                                    color: kWhiteColor,
+                                /// CALLBACK ACTION HERE
+                                icon: const FaIcon(
+                                  FontAwesomeIcons.check,
+                                  color: kWhiteColor,
+                                ),
+                                label: const Padding(
+                                  padding: EdgeInsets.all(12.0),
+                                  child: Text(
+                                    "Enregistrer",
+                                    style: TextStyle(
+                                      color: kWhiteColor,
+                                    ),
+                                  ),
+                                ),
+                                style: TextButton.styleFrom(
+                                  backgroundColor: kDefaultBackgroundColor,
+                                  elevation: 2.0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(100.0),
                                   ),
                                 ),
                               ),
-                              style: TextButton.styleFrom(
-                                backgroundColor: kDefaultBackgroundColor,
-                                elevation: 2.0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(100.0),
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            )
-          ],
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -441,6 +439,7 @@ class _AddEventState extends State<AddEvent> {
           _pooStorm,
           _cloudMeatball,
           0.0,
+          fromD.month,
         );
 
         setState(() {
@@ -451,8 +450,24 @@ class _AddEventState extends State<AddEvent> {
           event.pooCloud = _cloudMeatball;
         });
 
-        await EventDatabaseService().saveEvent(event.from,event.title, event.description, event.from, event.to, event.color.value, event.isAllDay, event.sun, event.cloud, event.tint, event.pooCloud, event.cloudSomething, event.panierCount);
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const Layout()));
+        await EventDatabaseService().saveEvent(
+          event.from,
+          event.title,
+          event.description,
+          event.from,
+          event.to,
+          event.color.value,
+          event.isAllDay,
+          event.sun,
+          event.cloud,
+          event.tint,
+          event.pooCloud,
+          event.cloudSomething,
+          event.panierCount,
+          event.month,
+        );
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => const Layout()));
       }
 
       if (widget.matinOuSoir.contains("soir")) {
@@ -470,6 +485,7 @@ class _AddEventState extends State<AddEvent> {
           _pooStorm,
           _cloudMeatball,
           0.0,
+          fromD.month,
         );
 
         setState(() {
@@ -480,8 +496,24 @@ class _AddEventState extends State<AddEvent> {
           event.pooCloud = _cloudMeatball;
         });
 
-        await EventDatabaseService().saveEvent(event.from, event.title, event.description, event.from, event.to, event.color.value, event.isAllDay, event.sun, event.cloud, event.tint, event.pooCloud, event.cloudSomething, event.panierCount);
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => const Layout()));
+        await EventDatabaseService().saveEvent(
+          event.from,
+          event.title,
+          event.description,
+          event.from,
+          event.to,
+          event.color.value,
+          event.isAllDay,
+          event.sun,
+          event.cloud,
+          event.tint,
+          event.pooCloud,
+          event.cloudSomething,
+          event.panierCount,
+          event.month,
+        );
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => const Layout()));
       }
     }
   }
