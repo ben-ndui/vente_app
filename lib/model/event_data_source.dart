@@ -32,14 +32,7 @@ class EventDataSource extends CalendarDataSource {
   @override
   Color getColor(int index) {
     // TODO: implement getColor
-    return getEvent(index).panier.isEmpty &&
-            getEvent(index).sun == false &&
-            getEvent(index).cloud == false &&
-            getEvent(index).tint == false &&
-            getEvent(index).pooCloud == false &&
-            getEvent(index).cloudSomething == false
-        ? getEvent(index).color
-        : kLightBackgroundColor;
+    return getEvent(index).getColor;
   }
 
   @override

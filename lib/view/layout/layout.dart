@@ -5,6 +5,8 @@ import 'package:suividevente/utils/constants.dart';
 import 'package:suividevente/utils/menu_item.dart';
 import 'package:suividevente/view/dashboard/dashboard.dart';
 import 'package:suividevente/view/home/calendar_widget.dart';
+import 'package:suividevente/view/stats/components/stats_layout.dart';
+import 'package:suividevente/view/stats/stats_widget.dart';
 
 class Layout extends StatefulWidget {
   const Layout({Key? key}) : super(key: key);
@@ -42,7 +44,9 @@ class _LayoutState extends State<Layout> {
           MenuItem(
             title: "Statistiques",
             icon: const FaIcon(FontAwesomeIcons.chartBar, color: kWhiteColor, size: 15.0,),
-            func: () {},
+            func: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => const StatLayout()));
+            },
           ),
           MenuItem(
             title: "Calendriers",

@@ -43,5 +43,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Donner l&apos;accès aux fichiers par eShop afin d&apos;importer vos divers photo !</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Donner l&apos;accès aux fichiers par eShop afin d&apos;importer vos divers photo !</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Donner l&apos;accès du micro par eShop !</string>
 </dict>
 </plist>

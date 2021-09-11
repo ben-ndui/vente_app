@@ -30,5 +30,7 @@
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:444754953540:ios:1a8790b678f1df48f54311</string>
+	<key>DATABASE_URL</key>
+	<string>https://suivi-de-vente-default-rtdb.europe-west1.firebasedatabase.app</string>
 </dict>
 </plist>

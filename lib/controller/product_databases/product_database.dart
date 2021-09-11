@@ -26,7 +26,7 @@ class ProductDatabaseService {
         'title': title,
         'price': price,
         'img': img,
-        'nbProd': '$nbProd',
+        'nbProd': nbProd,
         'searchKey': title!.substring(0, 1),
       },
     ).then((value) => print("Ajout réussi")).catchError((error) => print("Failed to add user: $error"));
@@ -39,7 +39,7 @@ class ProductDatabaseService {
         'title': title,
         'price': price,
         'img': img,
-        'nbProd': '$prodNb',
+        'nbProd': prodNb,
         'searchKey': title!.substring(0, 1),
       },
     );
@@ -72,6 +72,11 @@ class ProductDatabaseService {
         .where('searchKey',
             isEqualTo: searchField.substring(0, 1).toUpperCase())
         .get();
+  }
+
+  delProdBy() {
+    return _firebaseInstance
+        .collection('products').doc(uid).delete();
   }
 
   searchByUserName(searchField) {

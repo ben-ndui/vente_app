@@ -17,6 +17,9 @@ class MyEvent {
   bool tint = false;
   bool pooCloud = false;
   bool cloudSomething = false;
+
+  bool isActive;
+
   double panierCount;
 
   int month;
@@ -42,6 +45,7 @@ class MyEvent {
     this.cloudSomething,
     this.panierCount,
     this.month,
+    this.isActive,
   );
 
   displayProduct() {
@@ -94,9 +98,8 @@ class MyEvent {
   }
 
   Color get getColor =>
-      panier.isNotEmpty || sun || cloud || tint || pooCloud || cloudSomething
-          ? color
-          : kLightBackgroundColor;
+      panierCount != 0.0 || sun || cloud || tint || pooCloud || cloudSomething || isActive
+          ? color : kLightBackgroundColor;
 
   @override
   String toString() => title;

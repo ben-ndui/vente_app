@@ -2,6 +2,8 @@
 
 Application permettant de suivre les ventes selon une journée ou autres
 
+By Smooth and Design
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

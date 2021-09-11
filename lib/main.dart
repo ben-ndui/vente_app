@@ -1,6 +1,7 @@
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +18,10 @@ import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft])
+      .then((_) {
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -63,11 +67,6 @@ class MyApp extends StatelessWidget {
                 ],
                 locale: const Locale('fr'),
                 title: 'Gestionnaire de vente',
-                themeMode: ThemeMode.dark,
-                theme: ThemeData(
-                  primarySwatch: Colors.blue,
-                  backgroundColor: kDefaultBackgroundColor,
-                ),
                 home: AnimatedSplashScreen(
                   backgroundColor: kDefaultBackgroundColor,
                   nextScreen: const Layout(),
@@ -78,7 +77,7 @@ class MyApp extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: const [
-                        SpinKitRipple(color: Colors.white),
+                        SpinKitChasingDots(color: Colors.white),
                       ],
                     ),
                   ),

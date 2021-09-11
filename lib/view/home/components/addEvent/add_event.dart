@@ -425,96 +425,154 @@ class _AddEventState extends State<AddEvent> {
 
     if (isValid) {
       if (widget.matinOuSoir.contains("matin")) {
-        final MyEvent event = MyEvent(
-          fromD,
-          titleController.text,
-          kYellowColor,
-          "Marché du Matin",
-          fromD,
-          toD,
-          false,
-          _sun,
-          _cloud,
-          _tint,
-          _pooStorm,
-          _cloudMeatball,
-          0.0,
-          fromD.month,
-        );
 
-        setState(() {
-          event.sun = _sun;
-          event.cloud = _cloud;
-          event.tint = _tint;
-          event.pooCloud = _pooStorm;
-          event.pooCloud = _cloudMeatball;
-        });
 
-        await EventDatabaseService().saveEvent(
-          event.from,
-          event.title,
-          event.description,
-          event.from,
-          event.to,
-          event.color.value,
-          event.isAllDay,
-          event.sun,
-          event.cloud,
-          event.tint,
-          event.pooCloud,
-          event.cloudSomething,
-          event.panierCount,
-          event.month,
-        );
+        var dateMap = {
+          "start": DateTime.parse("2021-01-01 08:00:00Z"),
+          "end": DateTime.parse("2030-01-01 14:00:00Z")
+        };
+
+        //return compute(calculateDaysInterval, dateMap);
+        var days = calculateDaysInterval(dateMap);
+
+        for (var i=0; i<days.length; i++) {
+          //print("${days[i].day} - ${days[i].month} - ${days[i].year}");
+          final MyEvent event = MyEvent(
+            DateTime(days[i].year, days[i].month, days[i].day, 8, 0, 0),
+            titleController.text,
+            kYellowColor,
+            "Marché du matin",
+            DateTime(days[i].year, days[i].month, days[i].day, 8, 0, 0),
+            DateTime(days[i].year, days[i].month, days[i].day, 14, 0, 0),
+            false,
+            _sun,
+            _cloud,
+            _tint,
+            _pooStorm,
+            _cloudMeatball,
+            0.0,
+            days[i].month,
+            false,
+          );
+
+          setState(() {
+            event.sun = _sun;
+            event.cloud = _cloud;
+            event.tint = _tint;
+            event.pooCloud = _pooStorm;
+            event.pooCloud = _cloudMeatball;
+          });
+
+          await EventDatabaseService().saveEvent(
+            event.from,
+            event.title,
+            event.description,
+            event.from,
+            event.to,
+            event.color.value,
+            event.isAllDay,
+            event.sun,
+            event.cloud,
+            event.tint,
+            event.pooCloud,
+            event.cloudSomething,
+            event.panierCount,
+            event.month,
+            false,
+          );
+        }
+
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (context) => const Layout()));
-      }
+      }else if (widget.matinOuSoir.contains("soir")) {
+        var dateMap = {
+          "start": DateTime.parse("2021-01-01 18:00:00Z"),
+          "end": DateTime.parse("2030-01-01 23:30:00Z")
+        };
 
-      if (widget.matinOuSoir.contains("soir")) {
-        final MyEvent event = MyEvent(
-          fromD,
-          titleController.text,
-          kBlueColor,
-          "Marché du soir",
-          fromD,
-          toD,
-          false,
-          _sun,
-          _cloud,
-          _tint,
-          _pooStorm,
-          _cloudMeatball,
-          0.0,
-          fromD.month,
-        );
+        //return compute(calculateDaysInterval, dateMap);
+        var days = calculateDaysInterval(dateMap);
 
-        setState(() {
-          event.sun = _sun;
-          event.cloud = _cloud;
-          event.tint = _tint;
-          event.pooCloud = _pooStorm;
-          event.pooCloud = _cloudMeatball;
-        });
+        for (var i=0; i<days.length; i++) {
+          //print("${days[i].day} - ${days[i].month} - ${days[i].year}");
+          final MyEvent event = MyEvent(
+            DateTime(days[i].year, days[i].month, days[i].day, 18, 0, 0),
+            titleController.text,
+            kBlueColor,
+            "Marché du soir",
+            DateTime(days[i].year, days[i].month, days[i].day, 18, 0, 0),
+            DateTime(days[i].year, days[i].month, days[i].day, 23, 0, 0),
+            false,
+            _sun,
+            _cloud,
+            _tint,
+            _pooStorm,
+            _cloudMeatball,
+            0.0,
+            days[i].month,
+            false,
+          );
 
-        await EventDatabaseService().saveEvent(
-          event.from,
-          event.title,
-          event.description,
-          event.from,
-          event.to,
-          event.color.value,
-          event.isAllDay,
-          event.sun,
-          event.cloud,
-          event.tint,
-          event.pooCloud,
-          event.cloudSomething,
-          event.panierCount,
-          event.month,
-        );
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => const Layout()));
+          setState(() {
+            event.sun = _sun;
+            event.cloud = _cloud;
+            event.tint = _tint;
+            event.pooCloud = _pooStorm;
+            event.pooCloud = _cloudMeatball;
+          });
+
+          await EventDatabaseService().saveEvent(
+            event.from,
+            event.title,
+            event.description,
+            event.from,
+            event.to,
+            event.color.value,
+            event.isAllDay,
+            event.sun,
+            event.cloud,
+            event.tint,
+            event.pooCloud,
+            event.cloudSomething,
+            event.panierCount,
+            event.month,
+            event.isActive,
+          );
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => const Layout()));
+        }
       }
     }
+  }
+
+  Future<List<DateTime>?> calculate() async {
+    var dateMap = {
+      "start": DateTime.parse("1990-01-01 20:18:04Z"),
+      "end": DateTime.parse("2050-01-01 20:18:04Z")
+    };
+
+    //return compute(calculateDaysInterval, dateMap);
+    var days = calculateDaysInterval(dateMap);
+
+    for (var i=0; i<days.length; i++) {
+      //print("${days[i].day} - ${days[i].month} - ${days[i].year}");
+    }
+  }
+
+  List<DateTime> calculateDaysInterval(dynamic dateMap) {
+    var startDate = dateMap["start"];
+    var endDate = dateMap["end"];
+    print(startDate.toString());
+    print(endDate.toString());
+
+    List<DateTime> days = [];
+    for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
+      days.add(startDate.add(Duration(days: i)));
+    }
+
+    /* for (var i=0; i<days.length; i++) {
+    print(days[i]);
+  }*/
+    return days;
   }
 }
