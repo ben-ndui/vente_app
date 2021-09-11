@@ -18,6 +18,7 @@ class EditProductsWidget extends StatefulWidget {
 class _EditProductsWidgetState extends State<EditProductsWidget> {
   double tranx = 0, trany = 0, scale = 1.0;
   bool menuOpen = false;
+  bool isHidden = false;
 
   @override
   Widget build(BuildContext context) {
@@ -130,9 +131,15 @@ class _EditProductsWidgetState extends State<EditProductsWidget> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             TextButton.icon(onPressed: (){
+                              // Hide product
+                              setState(() {
+                                isHidden = !isHidden;
+                              });
+                              ProductDatabaseService(uid: products[index].uid).updateProductInfo(products[index].uid, products[index].title, products[index].price, products[index].img, products[index].nbProd, isHidden);
+                            }, icon: FaIcon(products[index].isHidden ? FontAwesomeIcons.eyeSlash : FontAwesomeIcons.eye, color: products[index].isHidden ? kRedColor : Colors.green, size: 18.0,), label: const Text("Cacher", style: TextStyle(color: kDefaultBackgroundColor),)),
+                            TextButton.icon(onPressed: (){
                               Navigator.of(context).push(MaterialPageRoute(builder: (context) => FadeIn(child: EditArticle(product: products[index],))));
                             }, icon: const FaIcon(FontAwesomeIcons.edit, color: kDefaultBackgroundColor, size: 18.0,), label: const Text("Editer", style: TextStyle(color: kDefaultBackgroundColor),)),
-                            const SizedBox(width: 14.0,),
                             TextButton.icon(onPressed: (){
                               showDialog<void>(
                                 context: context,

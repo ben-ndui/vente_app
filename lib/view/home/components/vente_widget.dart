@@ -2,9 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:suividevente/controller/FirebaseStorage/storage.dart';
 import 'package:suividevente/controller/event_databases/event_databases.dart';
 import 'package:suividevente/controller/product_databases/product_database.dart';
 import 'package:suividevente/model/chiffres_by_month.dart';
@@ -258,6 +256,7 @@ class _VenteWidgetState extends State<VenteWidget>
         price: e.data()['prodPrice'],
         img: e.data()['prodImg'],
         nbProd: e.data()['prodNb'],
+        isHidden: e.data()['isHidden'],
       );
     }).toList();
 
@@ -269,17 +268,6 @@ class _VenteWidgetState extends State<VenteWidget>
       totalPanier = somme;
     });
   }
-
-  /*Padding(
-  padding: const EdgeInsets.only(right: 0.0, bottom: 20.0),
-  child: Container(
-  width: 60.0,
-  height: 60.0,
-  color: kBtnSelectedColor,
-  alignment: Alignment.center,
-  child: const FaIcon(FontAwesomeIcons.caretLeft, color: kDefaultBackgroundColor, size: 30.0,),
-  ),
-  )*/
 
   sortList() {
     int i;
@@ -311,14 +299,21 @@ class _VenteWidgetState extends State<VenteWidget>
                         ),
                       );
                     }
+
+                    List<Product> list = [];
                     final panier = snapshot.data;
+                    for (var element in panier!) {
+                      if(!element.isHidden){
+                        list.add(element);
+                      }
+                    }
 
                     return StreamBuilder<ChiffresByMonth>(
                         stream: EventDatabaseService(month: widget.selectedEvent.from.month, year: widget.selectedEvent.from.year).getChiffre(widget.selectedEvent.from),
                         builder: (context, snapshot) {
                           return GridView.builder(
                             shrinkWrap: true,
-                            itemCount: panier!.length,
+                            itemCount: list.length,
                             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                               mainAxisExtent: 180.0,
                               crossAxisCount: 4,
@@ -332,6 +327,7 @@ class _VenteWidgetState extends State<VenteWidget>
                                   year: widget.selectedEvent.from.year,
                                 ).allPanier,
                                 builder: (context, userPanierrr) {
+
                                   if(!userPanierrr.hasData) return const CircularProgressIndicator();
 
                                   if(!userPanierrr.data!.contains(panier[index].uid)){
@@ -347,6 +343,7 @@ class _VenteWidgetState extends State<VenteWidget>
                                           price: panier[index].price,
                                           img: panier[index].img,
                                           nbProd: panier[index].nbProd,
+                                          isHidden: panier[index].isHidden,
                                         );
 
                                         widget.selectedEvent
@@ -354,10 +351,10 @@ class _VenteWidgetState extends State<VenteWidget>
 
                                         if (snapshot.data != null) {
                                           tempp = snapshot.data!.chiffres +
-                                              double.parse(panier[index].price);
+                                              double.parse(list[index].price);
                                         } else {
                                           tempp = tempp +
-                                              double.parse(panier[index].price);
+                                              double.parse(list[index].price);
                                         }
 
                                         await EventDatabaseService().addEventToCart(
@@ -369,6 +366,7 @@ class _VenteWidgetState extends State<VenteWidget>
                                           product.nbProd,
                                           widget.selectedEvent.month,
                                           widget.selectedEvent.from,
+                                          product.isHidden,
                                         );
 
                                         EventDatabaseService(
@@ -390,7 +388,7 @@ class _VenteWidgetState extends State<VenteWidget>
                                           children: [
                                             FutureBuilder(
                                                 future: getImageFromStore(
-                                                    context, panier[index].img),
+                                                    context, list[index].img),
                                                 builder: (context, snap) {
                                                   if (!snap.hasData) {
                                                     return const CircularProgressIndicator();
@@ -401,11 +399,11 @@ class _VenteWidgetState extends State<VenteWidget>
                                               height: 10.0,
                                             ),
                                             Text(
-                                              panier[index].title,
+                                              list[index].title,
                                               style: TextStyle(
                                                 fontWeight: FontWeight.w400,
                                                 fontSize:
-                                                panier[index].title.length < 12
+                                                list[index].title.length < 12
                                                     ? 18.0
                                                     : 13.0,
                                               ),
@@ -415,7 +413,7 @@ class _VenteWidgetState extends State<VenteWidget>
                                             ),
                                             GridTile(
                                               child: Text(
-                                                "€" + panier[index].price,
+                                                "€" + list[index].price,
                                               ),
                                             ),
                                           ],
@@ -438,6 +436,7 @@ class _VenteWidgetState extends State<VenteWidget>
                                           userPanierrr.data![index].nbProd,
                                           widget.selectedEvent.month,
                                           widget.selectedEvent.from,
+                                            userPanierrr.data![index].isHidden,
                                         );
 
                                         panier[index].setProdNb(1);
@@ -450,6 +449,7 @@ class _VenteWidgetState extends State<VenteWidget>
                                           price: panier[index].price,
                                           img: panier[index].img,
                                           nbProd: panier[index].nbProd,
+                                          isHidden: panier[index].isHidden,
                                         );
 
                                         widget.selectedEvent
@@ -471,7 +471,8 @@ class _VenteWidgetState extends State<VenteWidget>
                                             widget.selectedEvent.title,
                                             widget.selectedEvent.from.month,
                                             tempp,
-                                            widget.selectedEvent.from);
+                                            widget.selectedEvent.from,
+                                        );
                                       },
                                       child: Card(
                                         child: Column(
@@ -633,7 +634,7 @@ class _VenteWidgetState extends State<VenteWidget>
                     buildMeteoButton(FontAwesomeIcons.cloudMeatball,
                         "cloudMeatball", widget.selectedEvent.cloudSomething),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -756,8 +757,14 @@ class _VenteWidgetState extends State<VenteWidget>
           title: e.data()['prodTitle'],
           price: e.data()['prodPrice'],
           img: e.data()['prodImg'],
-          nbProd: e.data()['prodNb']);
+          nbProd: e.data()['prodNb'],
+        isHidden: e.data()['isHidden'],
+      );
     }).toList();
+
+    for (var element in listProd) {
+      element.isHidden ? listProd.remove(element) : null;
+    }
 
     setState(() {
       widget.selectedEvent.panier = listProd;
@@ -767,6 +774,7 @@ class _VenteWidgetState extends State<VenteWidget>
   }
 
   Widget buildRightPanelBody() {
+    print(widget.title);
     return Expanded(
       child: SingleChildScrollView(
         child: Container(
@@ -841,7 +849,7 @@ class _VenteWidgetState extends State<VenteWidget>
                                             width: 10.0,
                                           ),
                                           StreamBuilder<ChiffresByMonth>(
-                                              stream: EventDatabaseService(month: widget.selectedEvent.from.month, year: widget.selectedEvent.from.year,).getChiffre(widget.selectedEvent.from),
+                                              stream: EventDatabaseService(month: widget.selectedEvent.from.month, year: widget.selectedEvent.from.year, eventUid: widget.title).getChiffre(widget.selectedEvent.from),
                                               builder: (context, snapshotD) {
                                                 return Expanded(
                                                   child: TextButton(
@@ -853,6 +861,7 @@ class _VenteWidgetState extends State<VenteWidget>
                                                         price: userPanier[index].price,
                                                         img: userPanier[index].img,
                                                         nbProd: userPanier[index].nbProd,
+                                                        isHidden: userPanier[index].isHidden,
                                                       );
                                                       widget.selectedEvent.panier.remove(product);
 
@@ -888,6 +897,7 @@ class _VenteWidgetState extends State<VenteWidget>
                                                         snapshot.data![index].nbProd,
                                                         widget.selectedEvent.month,
                                                         widget.selectedEvent.from,
+                                                        snapshot.data![index].isHidden,
                                                       );
                                                       Navigator.of(context).pop();
                                                     },

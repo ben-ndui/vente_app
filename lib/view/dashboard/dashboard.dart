@@ -235,9 +235,9 @@ class _DashboardState extends State<Dashboard> {
     final isValid = _formKey.currentState!.validate();
 
     if (isValid){
-      final Product product = Product(uid: titleController.value.text, title: titleController.value.text, price: priceController.text.trim(), img: _fileName, nbProd: 1);
+      final Product product = Product(uid: titleController.value.text, title: titleController.value.text, price: priceController.text.trim(), img: _fileName, nbProd: 1, isHidden: false);
       ProductDatabaseService provider = ProductDatabaseService(uid: product.uid);
-      await ProductDatabaseService(uid: product.uid).saveProduct(product.uid, product.title, product.price, product.img, product.nbProd);
+      await ProductDatabaseService(uid: product.uid).saveProduct(product.uid, product.title, product.price, product.img, product.nbProd, false);
     }else{
       print("Une erreur s'est produite lors de l'ajout du produit");
     }

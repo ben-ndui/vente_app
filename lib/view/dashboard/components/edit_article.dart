@@ -17,6 +17,7 @@ class EditArticle extends StatefulWidget {
 class _EditArticleState extends State<EditArticle> {
 
   final _formKey = GlobalKey<FormState>();
+  var isHidden = false;
 
   final TextEditingController prodTitle = TextEditingController();
   final TextEditingController prodPrice = TextEditingController();
@@ -84,11 +85,16 @@ class _EditArticleState extends State<EditArticle> {
                 ),
                 TextButton.icon(onPressed: () async {
                   if(_formKey.currentState!.validate()){
-                    await ProductDatabaseService(uid: widget.product.uid).updateProductInfo(widget.product.uid, prodTitle.text.trim(), prodPrice.text.trim(), widget.product.img, widget.product.nbProd).then((value){
+                    await ProductDatabaseService(uid: widget.product.uid).updateProductInfo(widget.product.uid, prodTitle.text.trim(), prodPrice.text.trim(), widget.product.img, widget.product.nbProd, isHidden).then((value){
                       Navigator.of(context).pop();
                     });
                   }
-                }, icon: const FaIcon(FontAwesomeIcons.check, color: Colors.green,), label: const Text("Enregistrer"))
+                }, icon: const FaIcon(FontAwesomeIcons.check, color: Colors.green,), label: const Text("Enregistrer")),
+                TextButton.icon(onPressed: () async {
+                  setState(() {
+                    isHidden = !isHidden;
+                  });
+                }, icon: FaIcon(FontAwesomeIcons.eyeSlash, color: isHidden ? kYellowColor : kLightBackgroundColor,), label: const Text("Cacher ce produit"))
               ],
             ),
           ),

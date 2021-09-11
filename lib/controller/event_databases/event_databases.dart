@@ -210,6 +210,7 @@ class EventDatabaseService extends ChangeNotifier {
     int? prodNb,
     int? month,
     DateTime? day,
+      bool? isHidden,
   ) async {
     if (prodNb == 0) {
       return await eventCollection
@@ -233,6 +234,7 @@ class EventDatabaseService extends ChangeNotifier {
           'prodPrice': prodPrice,
           'prodImg': prodImg,
           'prodNb': prodNb,
+          'isHidden': isHidden,
           'searchKey': prodTitle!.substring(0, 1),
         },
       );
@@ -248,6 +250,7 @@ class EventDatabaseService extends ChangeNotifier {
     int? prodNb,
     int? month,
     DateTime? day,
+      bool? isHidden,
   ) async {
     if (prodNb == 0) {
       return await eventCollection
@@ -271,6 +274,7 @@ class EventDatabaseService extends ChangeNotifier {
           'prodPrice': prodPrice,
           'prodImg': prodImg,
           'prodNb': prodNb,
+          'isHidden': isHidden,
           'searchKey': prodTitle!.substring(0, 1),
         },
       );
@@ -284,7 +288,7 @@ class EventDatabaseService extends ChangeNotifier {
     DateTime? day,
   ) async {
     return await chiffresCollection
-        .doc("$year").collection("all").doc('$month')
+        .doc("$year").collection("all").doc('$month - $title')
         .set(
       {
         'title': title,
@@ -301,7 +305,7 @@ class EventDatabaseService extends ChangeNotifier {
     DateTime? day,
   ) async {
     return await chiffresCollection
-        .doc("$year").collection("all").doc('$cfMonth')
+        .doc("$year").collection("all").doc('$cfMonth - $title')
         .update(
       {
         'title': title,
@@ -320,6 +324,7 @@ class EventDatabaseService extends ChangeNotifier {
     int? prodNb,
     int? month,
     DateTime? day,
+      bool? isHidden,
   ) async {
     return await eventCollection
         .doc('$month - ${day!.year}')
@@ -334,6 +339,7 @@ class EventDatabaseService extends ChangeNotifier {
         'prodPrice': prodPrice,
         'prodImg': prodImg,
         'prodNb': prodNb,
+        'isHidden': isHidden,
         'searchKey': prodTitle!.substring(0, 1),
       },
     );
@@ -369,6 +375,7 @@ class EventDatabaseService extends ChangeNotifier {
       price: userData['prodPrice'],
       img: userData['prodImg'],
       nbProd: userData['prodNb'],
+      isHidden: userData['isHidden'],
     );
   }
 
@@ -384,11 +391,11 @@ class EventDatabaseService extends ChangeNotifier {
 
   /// Stream to get current user
   Stream<MyEvent> get anEvent {
-    return eventCollection.doc(eventUid).snapshots().map(_eventsFromSnapShot);
+    return eventCollection.doc('$month - $year').collection("all").doc(eventUid).snapshots().map(_eventsFromSnapShot);
   }
 
   Stream<ChiffresByMonth> getChiffre(DateTime? mois){
-    return chiffresCollection.doc("${mois!.year}").collection("all").doc("${mois.month}").snapshots().map(_chiffresFromSnapShot);
+    return chiffresCollection.doc("${mois!.year}").collection("all").doc("${mois.month} - $eventUid").snapshots().map(_chiffresFromSnapShot);
   }
 
   /// Stream list to get all users

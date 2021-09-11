@@ -19,7 +19,7 @@ class ProductDatabaseService {
   }
 
   /// Save user
-  Future<void> saveProduct(String? uid, String? title, String? price, String? img, int? nbProd) async {
+  Future<void> saveProduct(String? uid, String? title, String? price, String? img, int? nbProd, bool? isHidden) async {
     return await _firebaseInstance.collection("products").doc(uid).set(
       {
         'uid': uid,
@@ -27,12 +27,13 @@ class ProductDatabaseService {
         'price': price,
         'img': img,
         'nbProd': nbProd,
+        'isHidden': isHidden,
         'searchKey': title!.substring(0, 1),
       },
     ).then((value) => print("Ajout réussi")).catchError((error) => print("Failed to add user: $error"));
   }
 
-  Future<void> updateProductInfo(String? uid, String? title, String? price,String? img, int? prodNb) async {
+  Future<void> updateProductInfo(String? uid, String? title, String? price,String? img, int? prodNb, bool? isHidden) async {
     return await _firebaseInstance.collection("products").doc(uid).update(
       {
         'uid': uid,
@@ -40,6 +41,7 @@ class ProductDatabaseService {
         'price': price,
         'img': img,
         'nbProd': prodNb,
+        'isHidden': isHidden,
         'searchKey': title!.substring(0, 1),
       },
     );
@@ -53,6 +55,7 @@ class ProductDatabaseService {
       price: userData["price"],
       img: userData["img"],
       nbProd: userData["nbProd"],
+      isHidden: userData["isHidden"]
     );
   }
 

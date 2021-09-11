@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:suividevente/controller/event_databases/event_databases.dart';
 import 'package:suividevente/model/chiffres_by_month.dart';
 import 'package:suividevente/model/my_event.dart';
+import 'package:suividevente/model/product.dart';
 import 'package:suividevente/utils/constants.dart';
 import 'package:suividevente/utils/menu_item.dart';
 import 'package:suividevente/utils/theme.dart';
@@ -32,13 +33,20 @@ class _StatsWidgetState extends State<StatsWidget> {
   bool yearIsActive = false;
   bool visible = false;
   bool visible2 = false;
-  bool matinOuSoir = false;
+  bool activeMatin = false;
+  bool activeSoir = false;
 
   List<MyEvent> eventss = [];
 
+  List<MyEvent> matin = [];
+  List<MyEvent> soir = [];
+
   List<double> aout = [];
 
-  double total = 0.0;
+  double totalMatin = 0.0;
+  double totalMatinYear = 0.0;
+  double totalSoir = 0.0;
+  double totalSoirYear = 0.0;
 
   DateTime dateTime = DateTime.now();
 
@@ -46,6 +54,9 @@ class _StatsWidgetState extends State<StatsWidget> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    getAllEvent();
+    getTotalByMonthAndEvent();
+    getTotalByYearAndChiffre();
   }
 
   @override
@@ -145,16 +156,16 @@ class _StatsWidgetState extends State<StatsWidget> {
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  Expanded(child: button(size, kYellowColor, "Marché du matin")),
+                  Expanded(
+                      child: button(size, kYellowColor, "Marché du matin")),
                   Expanded(child: button(size, kBlueColor, "Marché du soir")),
                 ],
               ),
             ),
             SingleChildScrollView(
               physics: const ScrollPhysics(),
-              child: yearIsActive
-                  ? buildDayForCurrentYear()
-                  : buildMonthStats(),
+              child:
+                  yearIsActive ? buildDayForCurrentYear() : buildMonthStats(),
             ),
             StreamBuilder<List<ChiffresByMonth>>(
                 stream: EventDatabaseService(
@@ -162,8 +173,12 @@ class _StatsWidgetState extends State<StatsWidget> {
                     .allMonth,
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) return const Text("Rien à afficher");
-                  return Text(
-                    "SOLD: $total",
+                  return !yearIsActive ? Text(
+                    "Chiffres : ${activeMatin ? totalMatin : totalSoir}",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: kWhiteColor, fontSize: 30.0),
+                  ) : Text(
+                    "Chiffres : ${activeMatin ? totalMatinYear : totalSoirYear}",
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: kWhiteColor, fontSize: 30.0),
                   );
@@ -210,14 +225,16 @@ class _StatsWidgetState extends State<StatsWidget> {
                   setState(() {
                     visible = !visible;
                     visible2 = !visible2;
-                    matinOuSoir = !matinOuSoir;
+                    activeMatin = true;
+                    activeSoir = false;
                   });
                 } else if (text.contains("Marché du soir")) {
                   //Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddEvent(matinOuSoir: "Marché du soir")));
                   setState(() {
                     visible = !visible;
                     visible2 = !visible2;
-                    matinOuSoir = !matinOuSoir;
+                    activeSoir = true;
+                    activeMatin = false;
                   });
                 }
               },
@@ -297,7 +314,6 @@ class _StatsWidgetState extends State<StatsWidget> {
               onPressed: () {
                 setState(() {
                   yearIsActive = !yearIsActive;
-                  getTotal();
                   //getAllEventsByMonthAndYear();
                 });
               },
@@ -421,11 +437,10 @@ class _StatsWidgetState extends State<StatsWidget> {
         });
 
         return SingleChildScrollView(
-          physics: const ScrollPhysics(),
           child: Container(
             padding: const EdgeInsets.only(top: 50.0, bottom: 80.0),
             child: ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
+              scrollDirection: Axis.horizontal,
               itemCount: events.length,
               shrinkWrap: true,
               itemBuilder: (context, index) {
@@ -450,7 +465,9 @@ class _StatsWidgetState extends State<StatsWidget> {
 
   Widget buildMeteo(MyEvent event) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         event.sun
             ? FaIcon(
@@ -458,50 +475,47 @@ class _StatsWidgetState extends State<StatsWidget> {
                 color: event.title == "Marché du matin"
                     ? kYellowColor
                     : kBlueColor,
+                size: 18.0,
               )
             : Container(),
-        const SizedBox(
-          width: 10.0,
-        ),
+        const SizedBox(width: 5.0,),
         event.cloud
             ? FaIcon(
                 FontAwesomeIcons.cloud,
                 color: event.title == "Marché du matin"
                     ? kYellowColor
                     : kBlueColor,
+                size: 18.0,
               )
             : Container(),
-        const SizedBox(
-          width: 10.0,
-        ),
+        const SizedBox(width: 5.0,),
         event.tint
             ? FaIcon(
                 FontAwesomeIcons.tint,
                 color: event.title == "Marché du matin"
                     ? kYellowColor
                     : kBlueColor,
+                size: 18.0,
               )
             : Container(),
-        const SizedBox(
-          width: 10.0,
-        ),
+        const SizedBox(width: 5.0,),
         event.pooCloud
             ? FaIcon(
                 FontAwesomeIcons.pooStorm,
                 color: event.title == "Marché du matin"
                     ? kYellowColor
                     : kBlueColor,
+                size: 18.0,
               )
             : Container(),
-        const SizedBox(
-          width: 10.0,
-        ),
+        const SizedBox(width: 5.0,),
         event.cloudSomething
             ? FaIcon(
                 FontAwesomeIcons.cloudMeatball,
                 color: event.title == "Marché du matin"
                     ? kYellowColor
                     : kBlueColor,
+                size: 18.0,
               )
             : Container(),
       ],
@@ -509,89 +523,45 @@ class _StatsWidgetState extends State<StatsWidget> {
   }
 
   Widget buildMonthStats() {
-    return matinOuSoir ? buildSoir() : buildMatin();
-  }
-
-  Widget buildMatin() {
-    return StreamBuilder<List<MyEvent>>(
-      stream: EventDatabaseService(month: dateTime.month, year: dateTime.year)
-          .allEvents,
-      builder: (context, events) {
-        if (!events.hasData) return const CircularProgressIndicator();
-        return Container(
-          padding: const EdgeInsets.all(10.0),
-          alignment: Alignment.center,
-          child: GridView.builder(
-            physics: const ScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 300,
-              childAspectRatio: 4,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 0,
-            ),
-            shrinkWrap: true,
-            itemCount: events.data!.length,
-            itemBuilder: (context, index) {
-              return events.data![index].title.contains("Marché du matin") ? Container(
-                //color: Colors.grey,
-                padding: const EdgeInsets.all(6.0),
-                child: GridTile(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            Utils.toDate2(events.data![index].from) +
-                                ' ${events.data![index].from.day} : ${events.data![index].panierCount} €',
-                            style: const TextStyle(
-                                color: kWhiteColor,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            events.data![index].title.contains("soir")
-                                ? "Soir"
-                                : "Matin",
-                            style: const TextStyle(
-                              color: kWhiteColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                      buildMeteo(events.data![index]),
-                    ],
-                  ),
-                ),
-              ) : Container();
-            },
+    return SafeArea(
+      child: Stack(
+        children: [
+          Visibility(
+            visible: activeMatin,
+            child: buildMarche("matin", matin),
           ),
-        );
-      },
+          Visibility(
+            visible: activeSoir,
+            child: buildMarche("soir", soir),
+          ),
+        ],
+      ),
     );
   }
-  
-  Widget buildSoir() {
-    return StreamBuilder<List<MyEvent>>(
-      stream: EventDatabaseService(month: dateTime.month, year: dateTime.year).allEvents,
-      builder: (context, events) {
 
-        if (!events.hasData) return const CircularProgressIndicator();
-
-        return GridView.builder(
+  Widget buildMarche(String text, List<MyEvent> list) {
+    return SizedBox(
+      height: 450.0,
+      child: Container(
+        padding: const EdgeInsets.all(10.0),
+        alignment: Alignment.center,
+        child: GridView.builder(
           physics: const ScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 400,
-            childAspectRatio: 5,
-            crossAxisSpacing: 0,
+            maxCrossAxisExtent: 300,
+            childAspectRatio: 4,
+            crossAxisSpacing: 10,
             mainAxisSpacing: 0,
           ),
           shrinkWrap: true,
-          itemCount: events.data!.length,
+          itemCount: list.length,
           itemBuilder: (context, index) {
-            return events.data![index].title.contains("Marché du soir") ? Container(
+
+            list.sort((a, b) {
+              return a.from.day.compareTo(b.from.day);
+            });
+
+            return Container(
               //color: Colors.grey,
               padding: const EdgeInsets.all(6.0),
               child: GridTile(
@@ -603,15 +573,32 @@ class _StatsWidgetState extends State<StatsWidget> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          Utils.toDate2(events.data![index].from) +
-                              ' ${events.data![index].from.day} : ${events.data![index].panierCount} €',
-                          style: const TextStyle(
-                              color: kWhiteColor,
-                              fontWeight: FontWeight.bold),
+                        Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              Utils.toDate2(list[index].from),
+                              style: const TextStyle(
+                                  color: kWhiteColor,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              ' ${list[index].from.day} ',
+                              style: const TextStyle(
+                                  color: kYellowColor,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                                ': ${list[index].panierCount} €',
+                              style: const TextStyle(
+                                  color: kWhiteColor,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ],
                         ),
                         Text(
-                          events.data![index].title.contains("soir")
+                          list[index].title.contains("soir")
                               ? "Soir"
                               : "Matin",
                           style: const TextStyle(
@@ -620,15 +607,37 @@ class _StatsWidgetState extends State<StatsWidget> {
                         ),
                       ],
                     ),
-                    buildMeteo(events.data![index]),
+                    buildMeteo(list[index]),
                   ],
                 ),
               ),
-            ) : Container();
+            );
           },
-        );
-      },
+        ),
+      ),
     );
+  }
+
+  getAllEvent(){
+    final events = EventDatabaseService(month: dateTime.month, year: dateTime.year).allEvents;
+    events.forEach((all) {
+      for (var event in all) {
+        switch(event.title){
+          case "Marché du matin":
+            setState(() {
+              matin.add(event);
+            });
+            break;
+          case "Marché du soir":
+            setState(() {
+              soir.add(event);
+            });
+            break;
+          default:
+            break;
+        }
+      }
+    });
   }
 
   Widget buildDayForCurrentMonth() {
@@ -698,21 +707,49 @@ class _StatsWidgetState extends State<StatsWidget> {
     );
   }
 
-  getTotal() async {
+  getTotalByMonthAndEvent() async {
+    final chiffresss =
+        EventDatabaseService(month: dateTime.month, year: dateTime.year)
+            .allEvents;
+
+    chiffresss.forEach((chifList) {
+      for (var element in chifList) {
+        print(element.panierCount);
+        setState(() {
+          if(element.title.contains("matin")) {
+            totalMatin = totalMatin + element.panierCount;
+          } else {
+            totalSoir = totalSoir + element.panierCount;
+          }
+        });
+      }
+    });
+
+    if (totalMatin < 0) {
+      totalMatin = 0.0;
+    }
+  }
+
+  getTotalByYearAndChiffre() async {
     final chiffresss =
         EventDatabaseService(month: dateTime.month, year: dateTime.year)
             .allMonth;
 
     chiffresss.forEach((chifList) {
       for (var element in chifList) {
+        print(element.chiffres);
         setState(() {
-          total = total + element.chiffres;
+          if(element.title.contains("matin")) {
+            totalMatinYear = totalMatinYear + element.chiffres;
+          } else {
+            totalSoirYear = totalSoirYear + element.chiffres;
+          }
         });
       }
     });
 
-    if (total < 0) {
-      total = 0.0;
+    if (totalMatin < 0) {
+      totalMatin = 0.0;
     }
   }
 
@@ -752,13 +789,26 @@ class _StatsWidgetState extends State<StatsWidget> {
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    Utils.toMonth(data[index].cfMonth) + " : $chiffress",
-                    style: const TextStyle(
-                      color: kWhiteColor,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        Utils.toMonth(data[index].cfMonth) + " : $chiffress",
+                        style: const TextStyle(
+                          color: kWhiteColor,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        data[index].title,
+                        style: const TextStyle(
+                          color: kWhiteColor,
+                          fontSize: 10.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

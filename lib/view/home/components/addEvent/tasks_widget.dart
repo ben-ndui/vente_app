@@ -45,25 +45,6 @@ class _TasksWidgetState extends State<TasksWidget> {
         appointmentBuilder: appointmentBuilder,
       ),
     );
-
-    /*return StreamBuilder<List<MyEvent>>(
-        stream: EventDatabaseService().allEvents,
-        builder: (context, snapshot) {
-          if(!snapshot.hasData){
-            return const Center(
-              child: Text("Aucun évènement à charger pour ce jour !"),
-            );
-          }
-          return FadeIn(
-            child: SfCalendar(
-              view: CalendarView.day,
-              dataSource: EventDataSource(snapshot.data!),
-              initialDisplayDate: snapshot.data!.first.from,
-              appointmentBuilder: appointmentBuilder,
-            ),
-          );
-        }
-    );*/
   }
 
   Widget appointmentBuilder(
@@ -88,32 +69,43 @@ class _TasksWidgetState extends State<TasksWidget> {
           widget.events.getEvent(1).month,
           true,
         );
-
-        await EventDatabaseService().updateEvent(
-          event.from,
-          event.title,
-          event.description,
-          event.from,
-          event.to,
-          event.color.value,
-          event.isAllDay,
-          event.sun,
-          event.cloud,
-          event.tint,
-          event.pooCloud,
-          event.cloudSomething,
-          event.panierCount,
-          event.month,
-          event.isActive,
-        );
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => VenteWidget(
-              selectedEvent: eventy,
-              title: widget.title,
+        if(!eventy.isActive){
+          await EventDatabaseService().updateEvent(
+            event.from,
+            event.title,
+            event.description,
+            event.from,
+            event.to,
+            event.color.value,
+            event.isAllDay,
+            event.sun,
+            event.cloud,
+            event.tint,
+            event.pooCloud,
+            event.cloudSomething,
+            event.panierCount,
+            event.month,
+            event.isActive,
+          );
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => VenteWidget(
+                selectedEvent: eventy,
+                title: event.title,
+              ),
             ),
-          ),
-        );
+          );
+        }else{
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => VenteWidget(
+                selectedEvent: eventy,
+                title: event.title,
+              ),
+            ),
+          );
+        }
+
       },
       child: Container(
         width: details.bounds.width,

@@ -5,10 +5,11 @@ class Product{
   final String title;
   final String price;
   final String img;
+  final bool isHidden;
   int nbProd = 0;
   double total = 0.0;
 
-  Product({required this.uid, required this.title, required this.price, required this.img, required this.nbProd});
+  Product({required this.uid, required this.title, required this.price, required this.img, required this.nbProd, required this.isHidden});
 
   double getTotal(){
     return nbProd * total;
