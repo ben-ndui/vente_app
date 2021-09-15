@@ -14,6 +14,7 @@ import 'package:suividevente/utils/constants.dart';
 import 'package:suividevente/utils/theme.dart';
 import 'package:suividevente/utils/utils.dart';
 import 'package:suividevente/view/layout/layout.dart';
+import 'package:weather_icons/weather_icons.dart';
 
 class VenteWidget extends StatefulWidget {
   final MyEvent selectedEvent;
@@ -48,6 +49,8 @@ class _VenteWidgetState extends State<VenteWidget>
   int somme = 1;
   double totalPanier = 0.0;
 
+  var tempp = 0.0;
+
   bool sun = false;
   bool cloud = false;
   bool tint = false;
@@ -57,9 +60,9 @@ class _VenteWidgetState extends State<VenteWidget>
   @override
   void initState() {
     // TODO: implement initState
-    super.initState();
     getDataFromFireStore();
-    myLoad();
+    print(widget.title);
+    super.initState();
   }
 
   myLoad() {
@@ -91,7 +94,7 @@ class _VenteWidgetState extends State<VenteWidget>
         child: Row(
           mainAxisSize: MainAxisSize.max,
           children: [
-            leftPanel(size),
+            buildProductList(size),
             rightPanel(context),
           ],
         ),
@@ -126,25 +129,28 @@ class _VenteWidgetState extends State<VenteWidget>
                   children: [
                     IconButton(
                       onPressed: () async {
-                        await EventDatabaseService(eventUid: widget.title).updateEventTotalPanier(
-                          totalPanier,
-                          "panier",
-                          widget.selectedEvent.from.month,
-                          widget.selectedEvent.from,
-                        );
+                        getSoldeEvent();
                         setState(() {
                           openPrice = !openPrice;
                           widget.selectedEvent.panierCount = totalPanier;
                         });
-                        getSoldeEvent();
+
                         Future.delayed(
-                          const Duration(seconds: 3), () async {
-                            setState(() {
-                                openPrice = !openPrice;
-                              },
-                            );
-                          },
-                        );
+                            const Duration(seconds: 3),
+                            () async {
+                              setState(
+                                () {
+                                  openPrice = !openPrice;
+                                },
+                              );
+                              EventDatabaseService(eventUid: widget.title).updateEventTotalPanier(
+                                totalPanier,
+                                "panier",
+                                widget.selectedEvent.from.month,
+                                widget.selectedEvent.from,
+                              );
+                            },
+                          );
                       },
                       icon: const FaIcon(
                         FontAwesomeIcons.caretLeft,
@@ -277,249 +283,14 @@ class _VenteWidgetState extends State<VenteWidget>
     }
   }
 
-  Widget leftPanel(Size size) {
+  Widget buildProductList(Size size) {
     return Expanded(
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.max,
           children: [
             myAppBar(),
-            Container(
-              width: size.width,
-              height: size.height,
-              padding: const EdgeInsets.all(10.0),
-              child: StreamBuilder<List<Product>>(
-                  stream: ProductDatabaseService().allProducts,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(
-                        child: Text(
-                          "Vous n'avez aucun produit en stock actuellement !",
-                          style: TextStyle(color: kWhiteColor),
-                        ),
-                      );
-                    }
-
-                    List<Product> list = [];
-                    final panier = snapshot.data;
-                    for (var element in panier!) {
-                      if(!element.isHidden){
-                        list.add(element);
-                      }
-                    }
-
-                    return StreamBuilder<ChiffresByMonth>(
-                        stream: EventDatabaseService(month: widget.selectedEvent.from.month, year: widget.selectedEvent.from.year).getChiffre(widget.selectedEvent.from),
-                        builder: (context, snapshot) {
-                          return GridView.builder(
-                            shrinkWrap: true,
-                            itemCount: list.length,
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              mainAxisExtent: 180.0,
-                              crossAxisCount: 4,
-                            ),
-                            itemBuilder: (BuildContext context, int index) {
-                              return StreamBuilder<List<Product>>(
-                                stream: EventDatabaseService(
-                                  eventUid: widget.title +
-                                      ' - ${widget.selectedEvent.from.day} - ${widget.selectedEvent.from.month} - ${widget.selectedEvent.from.year}',
-                                  month: widget.selectedEvent.month,
-                                  year: widget.selectedEvent.from.year,
-                                ).allPanier,
-                                builder: (context, userPanierrr) {
-
-                                  if(!userPanierrr.hasData) return const CircularProgressIndicator();
-
-                                  if(!userPanierrr.data!.contains(panier[index].uid)){
-                                    return GestureDetector(
-                                      onTap: () async {
-                                        //print("Je ne fais que des SET depuis le début gars..");
-
-                                        var tempp = 0.0;
-
-                                        Product product = Product(
-                                          uid: panier[index].uid,
-                                          title: panier[index].title,
-                                          price: panier[index].price,
-                                          img: panier[index].img,
-                                          nbProd: panier[index].nbProd,
-                                          isHidden: panier[index].isHidden,
-                                        );
-
-                                        widget.selectedEvent
-                                            .addProductToPanier(product);
-
-                                        if (snapshot.data != null) {
-                                          tempp = snapshot.data!.chiffres +
-                                              double.parse(list[index].price);
-                                        } else {
-                                          tempp = tempp +
-                                              double.parse(list[index].price);
-                                        }
-
-                                        await EventDatabaseService().addEventToCart(
-                                          widget.title,
-                                          product.uid,
-                                          product.title,
-                                          product.price,
-                                          product.img,
-                                          product.nbProd,
-                                          widget.selectedEvent.month,
-                                          widget.selectedEvent.from,
-                                          product.isHidden,
-                                        );
-
-                                        EventDatabaseService(
-                                            year:
-                                            widget.selectedEvent.from.year,
-                                            month:
-                                            widget.selectedEvent.from.month)
-                                            .saveChiffres(
-                                            widget.selectedEvent.title,
-                                            widget.selectedEvent.from.month,
-                                            tempp,
-                                            widget.selectedEvent.from,
-                                        );
-                                        panier[index].setProdNb(1);
-                                      },
-                                      child: Card(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            FutureBuilder(
-                                                future: getImageFromStore(
-                                                    context, list[index].img),
-                                                builder: (context, snap) {
-                                                  if (!snap.hasData) {
-                                                    return const CircularProgressIndicator();
-                                                  }
-                                                  return snap.data as Image;
-                                                }),
-                                            const SizedBox(
-                                              height: 10.0,
-                                            ),
-                                            Text(
-                                              list[index].title,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w400,
-                                                fontSize:
-                                                list[index].title.length < 12
-                                                    ? 18.0
-                                                    : 13.0,
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 1.0,
-                                            ),
-                                            GridTile(
-                                              child: Text(
-                                                "€" + list[index].price,
-                                              ),
-                                            ),
-                                          ],
-                                        ), //just for testing, will fill with image later
-                                      ),
-                                    );
-                                  }else{
-                                    return GestureDetector(
-                                      onTap: () async {
-                                        //print("Je ne fais que des SET depuis le début gars..");
-
-                                        userPanierrr.data![index].nbProd = userPanierrr.data![index].nbProd + 1;
-
-                                        await EventDatabaseService().addEventToCart(
-                                          widget.title,
-                                          userPanierrr.data![index].uid,
-                                          userPanierrr.data![index].title,
-                                          userPanierrr.data![index].price,
-                                          userPanierrr.data![index].img,
-                                          userPanierrr.data![index].nbProd,
-                                          widget.selectedEvent.month,
-                                          widget.selectedEvent.from,
-                                            userPanierrr.data![index].isHidden,
-                                        );
-
-                                        panier[index].setProdNb(1);
-
-                                        var tempp = 0.0;
-
-                                        Product product = Product(
-                                          uid: panier[index].uid,
-                                          title: panier[index].title,
-                                          price: panier[index].price,
-                                          img: panier[index].img,
-                                          nbProd: panier[index].nbProd,
-                                          isHidden: panier[index].isHidden,
-                                        );
-
-                                        widget.selectedEvent
-                                            .addProductToPanier(product);
-
-                                        if (snapshot.data != null) {
-                                          tempp = snapshot.data!.chiffres +
-                                              double.parse(panier[index].price);
-                                        } else {
-                                          tempp = tempp +
-                                              double.parse(panier[index].price);
-                                        }
-                                        EventDatabaseService(
-                                            year:
-                                            widget.selectedEvent.from.year,
-                                            month:
-                                            widget.selectedEvent.from.month)
-                                            .saveChiffres(
-                                            widget.selectedEvent.title,
-                                            widget.selectedEvent.from.month,
-                                            tempp,
-                                            widget.selectedEvent.from,
-                                        );
-                                      },
-                                      child: Card(
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            FutureBuilder(
-                                                future: getImageFromStore(
-                                                    context, panier[index].img),
-                                                builder: (context, snap) {
-                                                  if (!snap.hasData) {
-                                                    return const CircularProgressIndicator();
-                                                  }
-                                                  return snap.data as Image;
-                                                }),
-                                            const SizedBox(
-                                              height: 10.0,
-                                            ),
-                                            Text(
-                                              panier[index].title,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w400,
-                                                fontSize:
-                                                panier[index].title.length < 12
-                                                    ? 18.0
-                                                    : 13.0,
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 1.0,
-                                            ),
-                                            GridTile(
-                                              child: Text(
-                                                "€" + panier[index].price,
-                                              ),
-                                            ),
-                                          ],
-                                        ), //just for testing, will fill with image later
-                                      ),
-                                    );
-                                  }
-                                }
-                              );
-                            },
-                          );
-                        });
-                  }),
-            ),
+            buildProdListBody(size),
           ],
         ),
       ),
@@ -613,7 +384,7 @@ class _VenteWidgetState extends State<VenteWidget>
                     Text(
                       Utils.toDate(widget.selectedEvent.from) +
                           " - " +
-                          widget.selectedEvent.title,
+                          widget.title,
                       style: const TextStyle(color: kWhiteColor, fontSize: 14),
                     ),
                   ],
@@ -623,15 +394,15 @@ class _VenteWidgetState extends State<VenteWidget>
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    buildMeteoButton(FontAwesomeIcons.solidSun, "sun",
+                    buildMeteoButton(WeatherIcons.day_sunny, "sun",
                         widget.selectedEvent.sun),
-                    buildMeteoButton(FontAwesomeIcons.cloud, "cloud",
+                    buildMeteoButton(WeatherIcons.cloud, "cloud",
                         widget.selectedEvent.cloud),
-                    buildMeteoButton(FontAwesomeIcons.tint, "tint",
+                    buildMeteoButton(WeatherIcons.day_rain, "tint",
                         widget.selectedEvent.tint),
-                    buildMeteoButton(FontAwesomeIcons.pooStorm, "pooStorm",
+                    buildMeteoButton(WeatherIcons.day_storm_showers, "pooStorm",
                         widget.selectedEvent.pooCloud),
-                    buildMeteoButton(FontAwesomeIcons.cloudMeatball,
+                    buildMeteoButton(WeatherIcons.snow_wind,
                         "cloudMeatball", widget.selectedEvent.cloudSomething),
                   ],
                 ),
@@ -653,10 +424,12 @@ class _VenteWidgetState extends State<VenteWidget>
               sun = !sun;
               widget.selectedEvent.sun = sun;
             });
-            await EventDatabaseService(eventUid: widget.selectedEvent.title)
-                .updateEventMeteo(sun, "sun", widget.selectedEvent.month,
-                    widget.selectedEvent.from);
             provider.setDate(widget.selectedEvent.from);
+            await EventDatabaseService(eventUid: widget.title).updateEventMeteo(
+                sun,
+                "sun",
+                widget.selectedEvent.month,
+                widget.selectedEvent.from);
             break;
           case "cloud":
             final provider = Provider.of<EventProvider>(context, listen: false);
@@ -664,9 +437,11 @@ class _VenteWidgetState extends State<VenteWidget>
               cloud = !cloud;
               widget.selectedEvent.cloud = cloud;
             });
-            await EventDatabaseService(eventUid: widget.selectedEvent.title)
-                .updateEventMeteo(cloud, "cloud", widget.selectedEvent.month,
-                    widget.selectedEvent.from);
+            await EventDatabaseService(eventUid: widget.title).updateEventMeteo(
+                cloud,
+                "cloud",
+                widget.selectedEvent.month,
+                widget.selectedEvent.from);
             provider.setDate(widget.selectedEvent.from);
             break;
           case "tint":
@@ -675,9 +450,11 @@ class _VenteWidgetState extends State<VenteWidget>
               tint = !tint;
               widget.selectedEvent.tint = tint;
             });
-            await EventDatabaseService(eventUid: widget.selectedEvent.title)
-                .updateEventMeteo(tint, "tint", widget.selectedEvent.month,
-                    widget.selectedEvent.from);
+            await EventDatabaseService(eventUid: widget.title).updateEventMeteo(
+                tint,
+                "tint",
+                widget.selectedEvent.month,
+                widget.selectedEvent.from);
             provider.setDate(widget.selectedEvent.from);
             break;
           case "pooStorm":
@@ -686,9 +463,11 @@ class _VenteWidgetState extends State<VenteWidget>
               pooStorm = !pooStorm;
               widget.selectedEvent.pooCloud = pooStorm;
             });
-            await EventDatabaseService(eventUid: widget.selectedEvent.title)
-                .updateEventMeteo(pooStorm, "pooStorm",
-                    widget.selectedEvent.month, widget.selectedEvent.from);
+            await EventDatabaseService(eventUid: widget.title).updateEventMeteo(
+                pooStorm,
+                "pooStorm",
+                widget.selectedEvent.month,
+                widget.selectedEvent.from);
             provider.setDate(widget.selectedEvent.from);
             break;
           case "cloudMeatball":
@@ -697,9 +476,11 @@ class _VenteWidgetState extends State<VenteWidget>
               cloudSomething = !cloudSomething;
               widget.selectedEvent.cloudSomething = cloudSomething;
             });
-            await EventDatabaseService(eventUid: widget.selectedEvent.title)
-                .updateEventMeteo(cloudSomething, "cloudSomething",
-                    widget.selectedEvent.month, widget.selectedEvent.from);
+            await EventDatabaseService(eventUid: widget.title).updateEventMeteo(
+                cloudSomething,
+                "cloudSomething",
+                widget.selectedEvent.month,
+                widget.selectedEvent.from);
             provider.setDate(widget.selectedEvent.from);
             break;
         }
@@ -707,6 +488,7 @@ class _VenteWidgetState extends State<VenteWidget>
       icon: FaIcon(
         icon,
         color: value ? kYellowColor : kDarkGreyColor,
+        size: 26.0,
       ),
     );
   }
@@ -745,19 +527,21 @@ class _VenteWidgetState extends State<VenteWidget>
 
     var panier = await databaseReference
         .collection("events")
-        .doc('${widget.selectedEvent.month}')
+        .doc(
+            '${widget.selectedEvent.month} - ${widget.selectedEvent.from.year}')
         .collection("all")
-        .doc(widget.title + '${widget.selectedEvent.from.day}')
+        .doc(widget.title +
+            ' - ${widget.selectedEvent.from.day} - ${widget.selectedEvent.from.month} - ${widget.selectedEvent.from.year}')
         .collection('panier')
         .get();
 
     List<Product> listProd = panier.docs.map((e) {
       return Product(
-          uid: e.data()['prodUid'],
-          title: e.data()['prodTitle'],
-          price: e.data()['prodPrice'],
-          img: e.data()['prodImg'],
-          nbProd: e.data()['prodNb'],
+        uid: e.data()['prodUid'],
+        title: e.data()['prodTitle'],
+        price: e.data()['prodPrice'],
+        img: e.data()['prodImg'],
+        nbProd: e.data()['prodNb'],
         isHidden: e.data()['isHidden'],
       );
     }).toList();
@@ -770,11 +554,10 @@ class _VenteWidgetState extends State<VenteWidget>
       widget.selectedEvent.panier = listProd;
       widget.selectedEvent.isActive = true;
     });
-    widget.selectedEvent.panier = listProd;
   }
 
   Widget buildRightPanelBody() {
-    print(widget.title);
+    //print(widget.title);
     return Expanded(
       child: SingleChildScrollView(
         child: Container(
@@ -811,114 +594,200 @@ class _VenteWidgetState extends State<VenteWidget>
                       elevation: 0.0,
                       color: kLightBackgroundColor,
                       child: ListTile(
-                        leading: Text("${userPanier[index].nbProd == 0 ? userPanier[index].nbProd = 0 : userPanier[index].nbProd}", style: const TextStyle(color: kWhiteColor),),
+                        leading: Text(
+                          "${userPanier[index].nbProd == 0 ? userPanier[index].nbProd = 0 : userPanier[index].nbProd}",
+                          style: const TextStyle(color: kWhiteColor),
+                        ),
                         title: Text(
                           userPanier[index].title,
                           style: const TextStyle(color: kWhiteColor),
                         ),
-                        trailing: delprod ? IconButton(
-                          onPressed: () {
-                            showDialog<String>(
-                              context: context,
-                              builder: (BuildContext context) =>
-                                  AlertDialog(
-                                    title: const Text(
-                                      "Etes vous sur de vouloir \n retirer un article ?",
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    actions: [
-                                      Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: TextButton(
-                                              onPressed: () => Navigator.pop(context, 'Cancel'),
-                                              child: const Text(
-                                                'Cancel',
-                                                style: TextStyle(
-                                                  color: kWhiteColor,
+                        trailing: delprod
+                            ? IconButton(
+                                onPressed: () {
+                                  showDialog<String>(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        AlertDialog(
+                                      title: const Text(
+                                        "Etes vous sur de vouloir \n retirer un article ?",
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      actions: [
+                                        Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, 'Cancel'),
+                                                child: const Text(
+                                                  'Cancel',
+                                                  style: TextStyle(
+                                                    color: kWhiteColor,
+                                                  ),
+                                                ),
+                                                style: TextButton.styleFrom(
+                                                  backgroundColor: kRedColor,
                                                 ),
                                               ),
-                                              style: TextButton.styleFrom(
-                                                backgroundColor: kRedColor,
-                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(
-                                            width: 10.0,
-                                          ),
-                                          StreamBuilder<ChiffresByMonth>(
-                                              stream: EventDatabaseService(month: widget.selectedEvent.from.month, year: widget.selectedEvent.from.year, eventUid: widget.title).getChiffre(widget.selectedEvent.from),
-                                              builder: (context, snapshotD) {
-                                                return Expanded(
-                                                  child: TextButton(
-                                                    onPressed: () async {
-                                                      userPanier[index].setProdNb(-1);
-                                                      Product product = Product(
-                                                        uid: userPanier[index].uid,
-                                                        title: userPanier[index].title,
-                                                        price: userPanier[index].price,
-                                                        img: userPanier[index].img,
-                                                        nbProd: userPanier[index].nbProd,
-                                                        isHidden: userPanier[index].isHidden,
-                                                      );
-                                                      widget.selectedEvent.panier.remove(product);
+                                            const SizedBox(
+                                              width: 10.0,
+                                            ),
+                                            StreamBuilder<ChiffresByMonth>(
+                                                stream: EventDatabaseService(
+                                                        month: widget
+                                                            .selectedEvent
+                                                            .from
+                                                            .month,
+                                                        year: widget
+                                                            .selectedEvent
+                                                            .from
+                                                            .year,
+                                                        eventUid: widget.title)
+                                                    .getChiffre(widget
+                                                        .selectedEvent.from),
+                                                builder: (context, snapshotD) {
+                                                  return Expanded(
+                                                    child: TextButton(
+                                                      onPressed: () async {
+                                                        userPanier[index]
+                                                            .setProdNb(-1);
+                                                        Product product =
+                                                            Product(
+                                                          uid: userPanier[index]
+                                                              .uid,
+                                                          title:
+                                                              userPanier[index]
+                                                                  .title,
+                                                          price:
+                                                              userPanier[index]
+                                                                  .price,
+                                                          img: userPanier[index]
+                                                              .img,
+                                                          nbProd:
+                                                              userPanier[index]
+                                                                  .nbProd,
+                                                          isHidden:
+                                                              userPanier[index]
+                                                                  .isHidden,
+                                                        );
+                                                        widget.selectedEvent
+                                                            .panier
+                                                            .remove(product);
 
-                                                      var tempp = 0.0;
+                                                        var tempp = 0.0;
 
-                                                      if (snapshot.data != null) {
-                                                        tempp = snapshotD.data!.chiffres -
-                                                            double.parse(userPanier[index].price);
-                                                      } else if(snapshot.data == null){
-                                                        tempp = 0.0;
-                                                      }else{
-                                                        tempp = tempp -
-                                                            double.parse(userPanier[index].price);
-                                                      }
+                                                        if (snapshot.data !=
+                                                                null &&
+                                                            snapshot.data!
+                                                                .isNotEmpty) {
+                                                          tempp = snapshotD
+                                                                  .data!
+                                                                  .chiffres -
+                                                              double.parse(
+                                                                  userPanier[
+                                                                          index]
+                                                                      .price);
+                                                        } else if (snapshot
+                                                            .data!.isEmpty) {
+                                                          tempp = 0.0;
+                                                        } else {
+                                                          tempp = tempp -
+                                                              double.parse(
+                                                                  userPanier[
+                                                                          index]
+                                                                      .price);
+                                                        }
 
-                                                      EventDatabaseService(
-                                                          year:
-                                                          widget.selectedEvent.from.year,
-                                                          month:
-                                                          widget.selectedEvent.from.month)
-                                                          .saveChiffres(
-                                                          widget.selectedEvent.title,
-                                                          widget.selectedEvent.from.month,
-                                                          tempp,
-                                                          widget.selectedEvent.from);
+                                                        EventDatabaseService(
+                                                                year: widget
+                                                                    .selectedEvent
+                                                                    .from
+                                                                    .year,
+                                                                month: widget
+                                                                    .selectedEvent
+                                                                    .from
+                                                                    .month)
+                                                            .saveChiffres(
+                                                                widget
+                                                                    .selectedEvent
+                                                                    .title,
+                                                                widget
+                                                                    .selectedEvent
+                                                                    .from
+                                                                    .month,
+                                                                tempp,
+                                                                widget
+                                                                    .selectedEvent
+                                                                    .from);
 
-                                                      await EventDatabaseService().addEventToCart(
-                                                        widget.title,
-                                                        snapshot.data![index].uid,
-                                                        snapshot.data![index].title,
-                                                        snapshot.data![index].price,
-                                                        snapshot.data![index].img,
-                                                        snapshot.data![index].nbProd,
-                                                        widget.selectedEvent.month,
-                                                        widget.selectedEvent.from,
-                                                        snapshot.data![index].isHidden,
-                                                      );
-                                                      Navigator.of(context).pop();
-                                                    },
-                                                    child: const Text('Enlever', style: TextStyle(color: kWhiteColor),),
-                                                    style: TextButton.styleFrom(
-                                                      backgroundColor: Colors.green,
+                                                        await EventDatabaseService()
+                                                            .addEventToCart(
+                                                          widget.title,
+                                                          snapshot
+                                                              .data![index].uid,
+                                                          snapshot.data![index]
+                                                              .title,
+                                                          snapshot.data![index]
+                                                              .price,
+                                                          snapshot
+                                                              .data![index].img,
+                                                          snapshot.data![index]
+                                                              .nbProd,
+                                                          widget.selectedEvent
+                                                              .month,
+                                                          widget.selectedEvent
+                                                              .from,
+                                                          snapshot.data![index]
+                                                              .isHidden,
+                                                        );
+
+                                                        getSoldeEvent();
+
+                                                        await EventDatabaseService(
+                                                                eventUid: widget
+                                                                    .title)
+                                                            .updateEventTotalPanier(
+                                                          totalPanier,
+                                                          "panier",
+                                                          widget.selectedEvent
+                                                              .from.month,
+                                                          widget.selectedEvent
+                                                              .from,
+                                                        )
+                                                            .then((value) {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        });
+                                                      },
+                                                      child: const Text(
+                                                        'Enlever',
+                                                        style: TextStyle(
+                                                            color: kWhiteColor),
+                                                      ),
+                                                      style:
+                                                          TextButton.styleFrom(
+                                                        backgroundColor:
+                                                            Colors.green,
+                                                      ),
                                                     ),
-                                                  ),
-                                                );
-                                              }),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                            );
-                          },
-                          icon: const FaIcon(
-                            FontAwesomeIcons.times,
-                            color: kRedColor,
-                          ),
-                        )
+                                                  );
+                                                }),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  );
+                                },
+                                icon: const FaIcon(
+                                  FontAwesomeIcons.times,
+                                  color: kRedColor,
+                                ),
+                              )
                             : null,
                       ),
                     ),
@@ -929,6 +798,202 @@ class _VenteWidgetState extends State<VenteWidget>
           ),
         ),
       ),
+    );
+  }
+
+  buildProdListBody(Size size) {
+    return Container(
+      width: size.width,
+      height: size.height,
+      padding: const EdgeInsets.all(10.0),
+      child: StreamBuilder<List<Product>>(
+          stream: ProductDatabaseService().allProducts,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(
+                child: Text(
+                  "Vous n'avez aucun produit en stock actuellement !",
+                  style: TextStyle(color: kWhiteColor),
+                ),
+              );
+            }
+
+            final allProducts = snapshot.data; // MES PRODUITS
+            List<Product> newAllProductWithHiddenProd =
+                []; // MON PANIER DE TRIE AVEC LES PRODUITs NON VISIBLE
+            for (var element in allProducts!) {
+              if (!element.isHidden) {
+                newAllProductWithHiddenProd.add(element);
+              }
+            }
+
+            return StreamBuilder<ChiffresByMonth>(
+
+                /// CHIFFRES STREAM
+                stream: EventDatabaseService(
+                        month: widget.selectedEvent.from.month,
+                        year: widget.selectedEvent.from.year)
+                    .getChiffre(widget.selectedEvent.from),
+                builder: (context, snapshot) {
+                  final chiffres = snapshot.data;
+                  return GridView.builder(
+                    /// GRIDVIEW BUILDER
+                    shrinkWrap: true,
+                    itemCount: newAllProductWithHiddenProd.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      mainAxisExtent: 180.0,
+                      crossAxisCount: 4,
+                    ),
+                    itemBuilder: (BuildContext context, int index) {
+                      return StreamBuilder<List<Product>>(
+
+                          /// EVENT OF THE DAY : PRODUCTS LIST STREAM
+                          stream: EventDatabaseService(
+                            eventUid: widget.title +
+                                ' - ${widget.selectedEvent.from.day} - ${widget.selectedEvent.from.month} - ${widget.selectedEvent.from.year}',
+                            month: widget.selectedEvent.month,
+                            year: widget.selectedEvent.from.year,
+                          ).allPanier,
+                          builder: (context, eventPanier) {
+                            if (!eventPanier.hasData)
+                              return const CircularProgressIndicator();
+
+                            final panierDuJour =
+                                eventPanier.data; // PANIER DE L'UTILISATEUR
+
+                            return GestureDetector(
+                              onTap: () async {
+                                print("Ajouté !");
+
+                                var tempp = 0.0;
+                                int nbprod = 0;
+
+                                for (var element in panierDuJour!) {
+                                  if (element.uid
+                                      .contains(allProducts[index].uid)) {
+                                    element.nbProd = element.nbProd + 1;
+                                    nbprod = element.nbProd;
+                                  }
+                                }
+
+                                Product product = Product(
+                                  uid: allProducts[index].uid,
+                                  title: allProducts[index].title,
+                                  price: allProducts[index].price,
+                                  img: allProducts[index].img,
+                                  nbProd: nbprod != 0
+                                      ? nbprod
+                                      : allProducts[index].nbProd,
+                                  isHidden: allProducts[index].isHidden,
+                                );
+
+                                setState(() {
+                                  widget.selectedEvent
+                                      .addProductToPanier(product);
+                                });
+
+                                await EventDatabaseService().addEventToCart(
+                                  widget.title,
+                                  product.uid,
+                                  product.title,
+                                  product.price,
+                                  product.img,
+                                  product.nbProd,
+                                  widget.selectedEvent.month,
+                                  widget.selectedEvent.from,
+                                  product.isHidden,
+                                );
+
+                                if (chiffres != null) {
+                                  tempp = chiffres.chiffres +
+                                      double.parse(allProducts[index].price);
+                                } else if (snapshot.data == null) {
+                                  tempp = tempp +
+                                      double.parse(allProducts[index].price);
+                                } else {
+                                  tempp = tempp +
+                                      double.parse(allProducts[index].price);
+                                }
+
+                                getSoldeEvent();
+
+                                EventDatabaseService(eventUid: widget.title)
+                                    .updateEventTotalPanier(
+                                        totalPanier,
+                                        "panier",
+                                        widget.selectedEvent.month,
+                                        widget.selectedEvent.from);
+
+                                EventDatabaseService(
+                                        year: widget.selectedEvent.from.year,
+                                        month: widget.selectedEvent.from.month)
+                                    .saveChiffres(
+                                  widget.selectedEvent.title,
+                                  widget.selectedEvent.from.month,
+                                  tempp,
+                                  widget.selectedEvent.from,
+                                );
+                                allProducts[index].setProdNb(1);
+                              },
+                              child: Card(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    FutureBuilder(
+                                        future: getImageFromStore(
+                                            context,
+                                            newAllProductWithHiddenProd[index]
+                                                .img),
+                                        builder: (context, snap) {
+                                          if (!snap.hasData) {
+                                            return const CircularProgressIndicator();
+                                          }
+                                          return ClipRRect(
+                                            child: snap.data as Image,
+                                            borderRadius:
+                                                const BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(4.0),
+                                                    topRight:
+                                                        Radius.circular(4.0)),
+                                          );
+                                        }),
+                                    const SizedBox(
+                                      height: 10.0,
+                                    ),
+                                    Text(
+                                      newAllProductWithHiddenProd[index].title,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w400,
+                                        fontSize:
+                                            newAllProductWithHiddenProd[index]
+                                                        .title
+                                                        .length <
+                                                    12
+                                                ? 18.0
+                                                : 13.0,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 1.0,
+                                    ),
+                                    GridTile(
+                                      child: Text(
+                                        "€" +
+                                            newAllProductWithHiddenProd[index]
+                                                .price,
+                                      ),
+                                    ),
+                                  ],
+                                ), //just for testing, will fill with image later
+                              ),
+                            );
+                          });
+                    },
+                  );
+                });
+          }),
     );
   }
 }

@@ -14,7 +14,6 @@ class ProductDatabaseService {
   /// Permet de récupérer les donnée de n'importe quel collection de firebase
   Future getAllProductsFromFirebase() async {
     QuerySnapshot snapshot = await _firebaseInstance.collection("products").get();
-
     return snapshot.docs;
   }
 

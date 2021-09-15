@@ -61,8 +61,8 @@ class _EditLayoutState extends State<EditLayout> {
             },
           ),
           MenuItem(
-            title: "Dashboard",
-            icon: const FaIcon(FontAwesomeIcons.user, color: kWhiteColor, size: 15.0,),
+            title: "Produits",
+            icon: const FaIcon(FontAwesomeIcons.store, color: kWhiteColor, size: 15.0,),
             func: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) => const Dashboard()));
             },

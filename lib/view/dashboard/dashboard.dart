@@ -15,6 +15,7 @@ import 'package:suividevente/utils/constants.dart';
 import 'package:suividevente/utils/theme.dart';
 import 'package:suividevente/view/dashboard/components/edit_layout.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:suividevente/view/layout/layout.dart';
 
 import 'components/edit_products_widget.dart';
 
@@ -116,7 +117,31 @@ class _DashboardState extends State<Dashboard> {
               setState(() {
                 menuOpen = false;
               });
-              Navigator.of(context).pop();
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (BuildContext context,
+                        Animation animation,
+                        Animation secondaryAnimation) {
+                      return const Layout();
+                    },
+                    transitionDuration:
+                    const Duration(milliseconds: 300),
+                    transitionsBuilder: (BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secondaryAnimation,
+                        Widget child) {
+                      animation = CurvedAnimation(
+                          curve: Curves.easeInOutCubic,
+                          parent: animation);
+
+                      return ScaleTransition(
+                        scale: animation,
+                        child: child,
+                      );
+                    },
+                  ),
+                      (Route route) => false);
             },
             child: const FaIcon(
               FontAwesomeIcons.arrowLeft,
@@ -127,7 +152,7 @@ class _DashboardState extends State<Dashboard> {
             width: 10.0,
           ),
           const Text(
-            "Dashboard",
+            "Produits",
             style: TextStyle(color: kWhiteColor, fontSize: titleSize),
           ),
         ],

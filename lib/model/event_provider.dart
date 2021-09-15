@@ -22,6 +22,16 @@ class EventProvider extends ChangeNotifier{
     notifyListeners();
   }
 
+  MyEvent? getEvent(String title){
+    for (var element in _events) {
+      if(element.title.contains(title)){
+        return element;
+      }else{
+        return null;
+      }
+    }
+  }
+
   void setEvent(MyEvent event){
     if(_events.contains(event)){
       _events.where((element){

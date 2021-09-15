@@ -486,7 +486,7 @@ class _AddEventState extends State<AddEvent> {
             .push(MaterialPageRoute(builder: (context) => const Layout()));
       }else if (widget.matinOuSoir.contains("soir")) {
         var dateMap = {
-          "start": DateTime.parse("2021-01-01 18:00:00Z"),
+          "start": DateTime.parse("2021-12-01 18:00:00Z"),
           "end": DateTime.parse("2030-01-01 23:30:00Z")
         };
 

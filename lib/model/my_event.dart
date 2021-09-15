@@ -88,18 +88,23 @@ class MyEvent {
   }
 
   void addProductToPanier(Product product) {
-    for (var element in panier) {
-      if (element.title == product.title) {
-        element.nbProd = element.nbProd + 1;
-      } else {
-        panier.add(product);
+    if(panier.isNotEmpty){
+      for (var element in panier) {
+        if (element.title == product.title) {
+          element.nbProd = element.nbProd + 1;
+        }
       }
     }
+    panier.add(product);
   }
 
   Color get getColor =>
-      panierCount != 0.0 || sun || cloud || tint || pooCloud || cloudSomething || isActive
+      panierCount != 0.0 || sun || cloud || tint || pooCloud || cloudSomething
           ? color : kLightBackgroundColor;
+
+  bool alreadyExist(){
+    return panierCount != 0.0 || sun || cloud || tint || pooCloud || cloudSomething ? true : false;
+  }
 
   @override
   String toString() => title;

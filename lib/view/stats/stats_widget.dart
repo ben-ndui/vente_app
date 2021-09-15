@@ -15,6 +15,7 @@ import 'package:suividevente/utils/utils.dart';
 import 'package:suividevente/view/dashboard/dashboard.dart';
 import 'package:suividevente/view/layout/layout.dart';
 import 'package:suividevente/view/stats/components/stats_layout.dart';
+import 'package:weather_icons/weather_icons.dart';
 
 class StatsWidget extends StatefulWidget {
   const StatsWidget({Key? key}) : super(key: key);
@@ -57,6 +58,20 @@ class _StatsWidgetState extends State<StatsWidget> {
     getAllEvent();
     getTotalByMonthAndEvent();
     getTotalByYearAndChiffre();
+  }
+
+  reloadMe(){
+    setState(() {
+      matin = [];
+      soir = [];
+
+      aout = [];
+
+      totalMatin = 0.0;
+      totalMatinYear = 0.0;
+      totalSoir = 0.0;
+      totalSoirYear = 0.0;
+    });
   }
 
   @override
@@ -103,11 +118,12 @@ class _StatsWidgetState extends State<StatsWidget> {
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   TextButton.icon(
                       onPressed: () {
+                        reloadMe();
                         setState(() {
                           if (yearIsActive) {
                             dateTime = DateTime(
@@ -117,10 +133,13 @@ class _StatsWidgetState extends State<StatsWidget> {
                             dateTime =
                                 DateTime(dateTime.year, dateTime.month - 1);
                           }
+                          getAllEvent();
+                          getTotalByMonthAndEvent();
+                          getTotalByYearAndChiffre();
                         });
                       },
                       icon: const FaIcon(
-                        FontAwesomeIcons.arrowCircleLeft,
+                        FontAwesomeIcons.chevronLeft,
                         color: kWhiteColor,
                       ),
                       label: const Text("")),
@@ -132,6 +151,7 @@ class _StatsWidgetState extends State<StatsWidget> {
                   ),
                   TextButton.icon(
                       onPressed: () {
+                        reloadMe();
                         setState(() {
                           if (yearIsActive) {
                             dateTime = DateTime(
@@ -141,10 +161,13 @@ class _StatsWidgetState extends State<StatsWidget> {
                             dateTime =
                                 DateTime(dateTime.year, dateTime.month + 1);
                           }
+                          getAllEvent();
+                          getTotalByMonthAndEvent();
+                          getTotalByYearAndChiffre();
                         });
                       },
                       icon: const FaIcon(
-                        FontAwesomeIcons.arrowCircleRight,
+                        FontAwesomeIcons.chevronRight,
                         color: kWhiteColor,
                       ),
                       label: const Text("")),
@@ -152,7 +175,7 @@ class _StatsWidgetState extends State<StatsWidget> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: [
@@ -174,11 +197,11 @@ class _StatsWidgetState extends State<StatsWidget> {
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) return const Text("Rien à afficher");
                   return !yearIsActive ? Text(
-                    "Chiffres : ${activeMatin ? totalMatin : totalSoir}",
+                    "Total : ${activeMatin ? totalMatin : totalSoir}",
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: kWhiteColor, fontSize: 30.0),
                   ) : Text(
-                    "Chiffres : ${activeMatin ? totalMatinYear : totalSoirYear}",
+                    "Total : ${activeMatin ? totalMatinYear : totalSoirYear}",
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: kWhiteColor, fontSize: 30.0),
                   );
@@ -221,8 +244,11 @@ class _StatsWidgetState extends State<StatsWidget> {
               onPressed: () {
                 if (text.contains("Marché du matin")) {
                   //Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddEvent(matinOuSoir: "Marché du matin")));
-
+                  reloadMe();
                   setState(() {
+                    getAllEvent();
+                    getTotalByMonthAndEvent();
+                    getTotalByYearAndChiffre();
                     visible = !visible;
                     visible2 = !visible2;
                     activeMatin = true;
@@ -230,7 +256,11 @@ class _StatsWidgetState extends State<StatsWidget> {
                   });
                 } else if (text.contains("Marché du soir")) {
                   //Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddEvent(matinOuSoir: "Marché du soir")));
+                  reloadMe();
                   setState(() {
+                    getAllEvent();
+                    getTotalByMonthAndEvent();
+                    getTotalByYearAndChiffre();
                     visible = !visible;
                     visible2 = !visible2;
                     activeSoir = true;
@@ -471,7 +501,7 @@ class _StatsWidgetState extends State<StatsWidget> {
       children: [
         event.sun
             ? FaIcon(
-                FontAwesomeIcons.sun,
+          WeatherIcons.day_sunny,
                 color: event.title == "Marché du matin"
                     ? kYellowColor
                     : kBlueColor,
@@ -481,7 +511,7 @@ class _StatsWidgetState extends State<StatsWidget> {
         const SizedBox(width: 5.0,),
         event.cloud
             ? FaIcon(
-                FontAwesomeIcons.cloud,
+          WeatherIcons.cloud,
                 color: event.title == "Marché du matin"
                     ? kYellowColor
                     : kBlueColor,
@@ -491,7 +521,7 @@ class _StatsWidgetState extends State<StatsWidget> {
         const SizedBox(width: 5.0,),
         event.tint
             ? FaIcon(
-                FontAwesomeIcons.tint,
+          WeatherIcons.day_rain,
                 color: event.title == "Marché du matin"
                     ? kYellowColor
                     : kBlueColor,
@@ -501,7 +531,7 @@ class _StatsWidgetState extends State<StatsWidget> {
         const SizedBox(width: 5.0,),
         event.pooCloud
             ? FaIcon(
-                FontAwesomeIcons.pooStorm,
+          WeatherIcons.day_storm_showers,
                 color: event.title == "Marché du matin"
                     ? kYellowColor
                     : kBlueColor,
@@ -511,7 +541,7 @@ class _StatsWidgetState extends State<StatsWidget> {
         const SizedBox(width: 5.0,),
         event.cloudSomething
             ? FaIcon(
-                FontAwesomeIcons.cloudMeatball,
+          WeatherIcons.snow_wind,
                 color: event.title == "Marché du matin"
                     ? kYellowColor
                     : kBlueColor,
@@ -585,25 +615,23 @@ class _StatsWidgetState extends State<StatsWidget> {
                             ),
                             Text(
                               ' ${list[index].from.day} ',
-                              style: const TextStyle(
-                                  color: kYellowColor,
+                              style: TextStyle(
+                                  color: text.contains("matin") ? kYellowColor : kBlueColor,
                                   fontWeight: FontWeight.bold),
                             ),
                             Text(
-                                ': ${list[index].panierCount} €',
+                                ': ${list[index].panierCount != 0.0 ? list[index].panierCount : ""}',
+                              style: const TextStyle(
+                                  color: kWhiteColor,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                                ' ${list[index].panierCount != 0.0 ? "€" : ""}',
                               style: const TextStyle(
                                   color: kWhiteColor,
                                   fontWeight: FontWeight.bold),
                             ),
                           ],
-                        ),
-                        Text(
-                          list[index].title.contains("soir")
-                              ? "Soir"
-                              : "Matin",
-                          style: const TextStyle(
-                            color: kWhiteColor,
-                          ),
                         ),
                       ],
                     ),
@@ -714,7 +742,7 @@ class _StatsWidgetState extends State<StatsWidget> {
 
     chiffresss.forEach((chifList) {
       for (var element in chifList) {
-        print(element.panierCount);
+        //print(element.panierCount);
         setState(() {
           if(element.title.contains("matin")) {
             totalMatin = totalMatin + element.panierCount;
@@ -725,8 +753,9 @@ class _StatsWidgetState extends State<StatsWidget> {
       }
     });
 
-    if (totalMatin < 0) {
+    if (totalMatin < 0 || totalSoir < 0) {
       totalMatin = 0.0;
+      totalSoir = 0.0;
     }
   }
 
@@ -737,7 +766,7 @@ class _StatsWidgetState extends State<StatsWidget> {
 
     chiffresss.forEach((chifList) {
       for (var element in chifList) {
-        print(element.chiffres);
+        //print(element.chiffres);
         setState(() {
           if(element.title.contains("matin")) {
             totalMatinYear = totalMatinYear + element.chiffres;
