@@ -288,7 +288,7 @@ class EventDatabaseService extends ChangeNotifier {
     DateTime? day,
   ) async {
     return await chiffresCollection
-        .doc("$year").collection("all").doc('$month - $title')
+        .doc("$year").collection("$month").doc('$month - $title - ${day!.day}')
         .set(
       {
         'title': title,
@@ -305,7 +305,7 @@ class EventDatabaseService extends ChangeNotifier {
     DateTime? day,
   ) async {
     return await chiffresCollection
-        .doc("$year").collection("all").doc('$cfMonth - $title')
+        .doc("$year").collection("$month").doc('$cfMonth - $title - ${day!.day}')
         .update(
       {
         'title': title,
@@ -395,7 +395,7 @@ class EventDatabaseService extends ChangeNotifier {
   }
 
   Stream<ChiffresByMonth> getChiffre(DateTime? mois){
-    return chiffresCollection.doc("${mois!.year}").collection("all").doc("${mois.month} - $eventUid").snapshots().map(_chiffresFromSnapShot);
+    return chiffresCollection.doc("${mois!.year}").collection("${mois.month}").doc("${mois.month} - $eventUid - ${mois.day}").snapshots().map(_chiffresFromSnapShot);
   }
 
   /// Stream list to get all users
@@ -410,7 +410,7 @@ class EventDatabaseService extends ChangeNotifier {
   Stream<List<ChiffresByMonth>> get allMonth {
     return chiffresCollection
         .doc('$year')
-        .collection("all")
+        .collection("$month")
         .snapshots()
         .map(_chiffresListFromSnapShot);
   }

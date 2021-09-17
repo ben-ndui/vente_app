@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:suividevente/controller/event_databases/event_databases.dart';
@@ -394,15 +395,19 @@ class _VenteWidgetState extends State<VenteWidget>
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    buildMeteoButton(WeatherIcons.day_sunny, "sun",
+                    buildMeteoButton("assets/weather/sun.svg", "sun",
                         widget.selectedEvent.sun),
-                    buildMeteoButton(WeatherIcons.cloud, "cloud",
+                    const SizedBox(width: 15.0,),
+                    buildMeteoButton("assets/weather/cloud.svg", "cloud",
                         widget.selectedEvent.cloud),
-                    buildMeteoButton(WeatherIcons.day_rain, "tint",
+                    const SizedBox(width: 15.0,),
+                    buildMeteoButton("assets/weather/raindrops.svg", "tint",
                         widget.selectedEvent.tint),
-                    buildMeteoButton(WeatherIcons.day_storm_showers, "pooStorm",
+                    const SizedBox(width: 15.0,),
+                    buildMeteoButton("assets/weather/bolt.svg", "pooStorm",
                         widget.selectedEvent.pooCloud),
-                    buildMeteoButton(WeatherIcons.snow_wind,
+                    const SizedBox(width: 15.0,),
+                    buildMeteoButton("assets/weather/snowflakes.svg",
                         "cloudMeatball", widget.selectedEvent.cloudSomething),
                   ],
                 ),
@@ -414,9 +419,9 @@ class _VenteWidgetState extends State<VenteWidget>
     );
   }
 
-  IconButton buildMeteoButton(IconData icon, String name, bool value) {
-    return IconButton(
-      onPressed: () async {
+  Widget buildMeteoButton(String icon, String name, bool value) {
+    return GestureDetector(
+      onTap: () async {
         switch (name) {
           case "sun":
             final provider = Provider.of<EventProvider>(context, listen: false);
@@ -485,10 +490,11 @@ class _VenteWidgetState extends State<VenteWidget>
             break;
         }
       },
-      icon: FaIcon(
+      child: SvgPicture.asset(
         icon,
         color: value ? kYellowColor : kDarkGreyColor,
-        size: 26.0,
+        width: 26.0,
+        height: 26.0,
       ),
     );
   }
@@ -856,11 +862,11 @@ class _VenteWidgetState extends State<VenteWidget>
                             year: widget.selectedEvent.from.year,
                           ).allPanier,
                           builder: (context, eventPanier) {
-                            if (!eventPanier.hasData)
+                            if (!eventPanier.hasData) {
                               return const CircularProgressIndicator();
+                            }
 
-                            final panierDuJour =
-                                eventPanier.data; // PANIER DE L'UTILISATEUR
+                            final panierDuJour = eventPanier.data; // PANIER DE L'UTILISATEUR
 
                             return GestureDetector(
                               onTap: () async {
@@ -905,17 +911,6 @@ class _VenteWidgetState extends State<VenteWidget>
                                   product.isHidden,
                                 );
 
-                                if (chiffres != null) {
-                                  tempp = chiffres.chiffres +
-                                      double.parse(allProducts[index].price);
-                                } else if (snapshot.data == null) {
-                                  tempp = tempp +
-                                      double.parse(allProducts[index].price);
-                                } else {
-                                  tempp = tempp +
-                                      double.parse(allProducts[index].price);
-                                }
-
                                 getSoldeEvent();
 
                                 EventDatabaseService(eventUid: widget.title)
@@ -925,15 +920,32 @@ class _VenteWidgetState extends State<VenteWidget>
                                         widget.selectedEvent.month,
                                         widget.selectedEvent.from);
 
-                                EventDatabaseService(
-                                        year: widget.selectedEvent.from.year,
-                                        month: widget.selectedEvent.from.month)
-                                    .saveChiffres(
-                                  widget.selectedEvent.title,
-                                  widget.selectedEvent.from.month,
-                                  tempp,
-                                  widget.selectedEvent.from,
-                                );
+                                if(nbprod != 0){
+
+                                  tempp = tempp + (double.parse(allProducts[index].price) * nbprod);
+
+                                  EventDatabaseService(
+                                      year: widget.selectedEvent.from.year,
+                                      month: widget.selectedEvent.from.month)
+                                      .updateChiffres(
+                                    widget.selectedEvent.title,
+                                    widget.selectedEvent.from.month,
+                                    tempp,
+                                    widget.selectedEvent.from,
+                                  );
+                                }else{
+                                  tempp = tempp + double.parse(allProducts[index].price);
+
+                                  EventDatabaseService(
+                                      year: widget.selectedEvent.from.year,
+                                      month: widget.selectedEvent.from.month)
+                                      .saveChiffres(
+                                    widget.selectedEvent.title,
+                                    widget.selectedEvent.from.month,
+                                    tempp,
+                                    widget.selectedEvent.from,
+                                  );
+                                }
                                 allProducts[index].setProdNb(1);
                               },
                               child: Card(

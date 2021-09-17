@@ -58,6 +58,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
         setState(() {});
       });
     });
+    getMarketOfTheDay();
     super.initState();
   }
 
@@ -141,209 +142,243 @@ class _CalendarWidgetState extends State<CalendarWidget> {
 
   Container buildPreviousAndNextButton() {
     return Container(
-                                margin: const EdgeInsets.only(top: 12.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      margin: const EdgeInsets.fromLTRB(30, 20, 0, 20),
-                                      child: TextButton.icon(
-                                        icon: const FaIcon(FontAwesomeIcons.chevronLeft, color: kWhiteColor,),
-                                        label: const Text(''),
-                                        onPressed: () {
-                                          _calendarController.backward!();
-                                        },
-                                      ),
-                                    ),
-                                    const SizedBox(width: 130.0,),
-                                    Container(
-                                      margin: const EdgeInsets.fromLTRB(70, 20, 0, 20),
-                                      child: TextButton.icon(
-                                        label: const Text(''),
-                                        icon: const FaIcon(FontAwesomeIcons.chevronRight, color: kWhiteColor,),
-                                        onPressed: () {
-                                          _calendarController.forward!();
-                                        },
-                                      ),
-                                    ),
-                                    const SizedBox(width: 25.0,),
-                                  ],
-                                ),
-                              );
+      margin: const EdgeInsets.only(top: 12.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            margin: const EdgeInsets.fromLTRB(30, 20, 0, 20),
+            child: TextButton.icon(
+              icon: const FaIcon(
+                FontAwesomeIcons.chevronLeft,
+                color: kWhiteColor,
+              ),
+              label: const Text(''),
+              onPressed: () {
+                _calendarController.backward!();
+              },
+            ),
+          ),
+          const SizedBox(
+            width: 130.0,
+          ),
+          Container(
+            margin: const EdgeInsets.fromLTRB(70, 20, 0, 20),
+            child: TextButton.icon(
+              label: const Text(''),
+              icon: const FaIcon(
+                FontAwesomeIcons.chevronRight,
+                color: kWhiteColor,
+              ),
+              onPressed: () {
+                _calendarController.forward!();
+              },
+            ),
+          ),
+          const SizedBox(
+            width: 25.0,
+          ),
+        ],
+      ),
+    );
+  }
+
+  getMarketOfTheDay() {
+    final eventOfDay = EventDatabaseService(month: _initialDate.month, year: _initialDate.year).allEvents;
+    marchesDuJour.clear();
+
+    eventOfDay.forEach((all) {
+      for (var ev in all) {
+        if (ev.from.day == DateTime.now().day) {
+          setState(() {
+            marchesDuJour.add(ev);
+          });
+        }
+      }
+    });
   }
 
   Widget calendar() {
     return SafeArea(
       child: StreamBuilder<List<MyEvent>>(
-        stream: EventDatabaseService(month: _initialDate.month, year: _initialDate.year).allEvents,
-        builder: (context, snapshot) {
+          stream: EventDatabaseService(
+                  month: _initialDate.month, year: _initialDate.year)
+              .allEvents,
+          builder: (context, snapshot) {
+            final marketOfTheDay = snapshot.data;
 
-          final marketOfTheDay = snapshot.data;
-
-          return SfCalendar(
-            controller: _calendarController,
-            view: _calendarView,
-            timeZone: "Central Europe Standard Time",
-            dataSource: events,
-            initialSelectedDate: _initialDate,
-            cellBorderColor: _cellBorder,
-            firstDayOfWeek: _firstDayOfWeek,
-            showNavigationArrow: false,
-            selectionDecoration: BoxDecoration(
-              color: _cellBorder,
-            ),
-            backgroundColor: kDefaultBackgroundColor,
-            blackoutDatesTextStyle: const TextStyle(
-              color: kWhiteColor,
-            ),
-            onViewChanged: (details){
-              _initialDate = details.visibleDates.first;
-              getDataFromFireStore();
-            },
-            todayTextStyle: const TextStyle(
-              color: kWhiteColor,
-            ),
-            headerHeight: 70,
-            scheduleViewMonthHeaderBuilder: (BuildContext buildContext,
-                ScheduleViewMonthHeaderDetails details) {
-              return Container(
-                color: Colors.red,
-                child: Text(
-                  details.date.month.toString() + ' ,' +
-                      details.date.year.toString(),
-                ),
-              );
-            },
-            headerStyle: const CalendarHeaderStyle(
+            return SfCalendar(
+              controller: _calendarController,
+              view: _calendarView,
+              timeZone: "Central Europe Standard Time",
+              dataSource: events,
+              initialSelectedDate: _initialDate,
+              cellBorderColor: _cellBorder,
+              firstDayOfWeek: _firstDayOfWeek,
+              showNavigationArrow: false,
+              selectionDecoration: BoxDecoration(
+                color: _cellBorder,
+              ),
               backgroundColor: kDefaultBackgroundColor,
-              textStyle: TextStyle(
+              blackoutDatesTextStyle: const TextStyle(
                 color: kWhiteColor,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
               ),
-              textAlign: TextAlign.center,
-            ),
-            headerDateFormat: 'MMMM, yyy',
-            viewHeaderStyle: ViewHeaderStyle(
-              dayTextStyle: TextStyle(
+              onViewChanged: (details) {
+                _initialDate = details.visibleDates.first;
+                getDataFromFireStore();
+              },
+              todayTextStyle: const TextStyle(
                 color: kWhiteColor,
-                locale: local,
               ),
-            ),
-            viewHeaderHeight: 40.0,
-            todayHighlightColor: kLightBackgroundColor,
-            appointmentBuilder:
-                (BuildContext context, CalendarAppointmentDetails details) {
-              return Center(
-                child: Container(
-                  color: selectedEvent!.getColor,
-                ),
-              );
-            },
-            monthViewSettings: const MonthViewSettings(
-                appointmentDisplayMode: MonthAppointmentDisplayMode.none,
-                appointmentDisplayCount: 2,
-                showTrailingAndLeadingDates: false,
-                monthCellStyle: MonthCellStyle(
-                  trailingDatesTextStyle: TextStyle(color: kLightBackgroundColor),
-                  textStyle: TextStyle(
-                    color: kWhiteColor,
-                  ),
-                  leadingDatesTextStyle: TextStyle(color: kLightBackgroundColor),
-                )),
-            monthCellBuilder:
-                (BuildContext buildContext, MonthCellDetails details) {
-              if (details.appointments.isNotEmpty) {
+              headerHeight: 70,
+              scheduleViewMonthHeaderBuilder: (BuildContext buildContext,
+                  ScheduleViewMonthHeaderDetails details) {
                 return Container(
-                  //color: kRedColor,
-                  alignment: Alignment.center,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(top: 40.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: details.appointments.map((e) {
-                            final dynamic occurrenceAppointment = e;
-                            return Container(
-                              width: 13.0,
-                              height: 13.0,
-                              margin: const EdgeInsets.all(2.0),
-                              decoration: BoxDecoration(
-                                color: occurrenceAppointment.getColor,
-                                borderRadius: BorderRadius.circular(100.0),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(//Cercle clair au fond
-                          color: details.date.day == isSelected.day ? const Color(0xFF6485AA).withOpacity(0.3) : Colors.transparent,
-                          borderRadius: const BorderRadius.all(Radius.circular(100.0)),
-                        ),
-                        width: 40.0,
-                        height: 40.0,
-                        alignment: Alignment.center,
-                        child: Text(
-                          details.date.day.toString(),
-                          style: const TextStyle(
-                            color: kWhiteColor,
-                          ),
-                        ),
-                      ),
-                    ],
+                  color: Colors.red,
+                  child: Text(
+                    details.date.month.toString() +
+                        ' ,' +
+                        details.date.year.toString(),
                   ),
                 );
-              }
-              return Center(
-                child: Container(
-                  alignment: Alignment.center,
-                  child: Text(
-                    details.date.day.toString(),
-                    style: const TextStyle(
+              },
+              headerStyle: const CalendarHeaderStyle(
+                backgroundColor: kDefaultBackgroundColor,
+                textStyle: TextStyle(
+                  color: kWhiteColor,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              headerDateFormat: 'MMMM, yyy',
+              viewHeaderStyle: ViewHeaderStyle(
+                dayTextStyle: TextStyle(
+                  color: kWhiteColor,
+                  locale: local,
+                ),
+              ),
+              viewHeaderHeight: 40.0,
+              todayHighlightColor: kLightBackgroundColor,
+              appointmentBuilder:
+                  (BuildContext context, CalendarAppointmentDetails details) {
+                return Center(
+                  child: Container(
+                    color: selectedEvent!.getColor,
+                  ),
+                );
+              },
+              monthViewSettings: const MonthViewSettings(
+                  appointmentDisplayMode: MonthAppointmentDisplayMode.none,
+                  appointmentDisplayCount: 2,
+                  showTrailingAndLeadingDates: false,
+                  monthCellStyle: MonthCellStyle(
+                    trailingDatesTextStyle:
+                        TextStyle(color: kLightBackgroundColor),
+                    textStyle: TextStyle(
                       color: kWhiteColor,
                     ),
+                    leadingDatesTextStyle:
+                        TextStyle(color: kLightBackgroundColor),
+                  )),
+              monthCellBuilder:
+                  (BuildContext buildContext, MonthCellDetails details) {
+                if (details.appointments.isNotEmpty) {
+                  return Container(
+                    //color: kRedColor,
+                    alignment: Alignment.center,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 40.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: details.appointments.map((e) {
+                              final dynamic occurrenceAppointment = e;
+                              return Container(
+                                width: 13.0,
+                                height: 13.0,
+                                margin: const EdgeInsets.all(2.0),
+                                decoration: BoxDecoration(
+                                  color: occurrenceAppointment.getColor,
+                                  borderRadius: BorderRadius.circular(100.0),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            //Cercle clair au fond
+                            color: details.date.day == isSelected.day
+                                ? const Color(0xFF6485AA).withOpacity(0.3)
+                                : Colors.transparent,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(100.0)),
+                          ),
+                          width: 40.0,
+                          height: 40.0,
+                          alignment: Alignment.center,
+                          child: Text(
+                            details.date.day.toString(),
+                            style: const TextStyle(
+                              color: kWhiteColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return Center(
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      details.date.day.toString(),
+                      style: const TextStyle(
+                        color: kWhiteColor,
+                      ),
+                    ),
                   ),
-                ),
-              );
-            },
-            onTap: (details) async {
-              final provider = Provider.of<EventProvider>(context, listen: false);
-              provider.setDate(details.date!);
+                );
+              },
+              onTap: (details) async {
+                final provider =
+                    Provider.of<EventProvider>(context, listen: false);
+                provider.setDate(details.date!);
 
-              marchesDuJour.clear();
+                marchesDuJour.clear();
 
-              for (var ev in marketOfTheDay!) {
-                if(ev.from.day == details.date!.day){
-                  setState(() {
-                    marchesDuJour.add(ev);
-                  });
+                for (var ev in marketOfTheDay!) {
+                  if (ev.from.day == details.date!.day) {
+                    setState(() {
+                      marchesDuJour.add(ev);
+                    });
+                  }
                 }
-              }
 
-              ///print(details.date!);
-              ///print(marchesDuJour);
-              ///print(marchesDuJour[0].sun);
-              ///print(marchesDuJour[1].sun);
+                ///print(details.date!);
+                ///print(marchesDuJour);
+                ///print(marchesDuJour[0].sun);
+                ///print(marchesDuJour[1].sun);
 
-              setState(() {
-                isSelected = details.date!;
-                _initialDate = isSelected;
-                if(mat){
-                  selectedEvent = details.appointments!.first;
-                }else{
-                  selectedEvent = details.appointments!.last;
-                }
-              });
+                setState(() {
+                  isSelected = details.date!;
+                  _initialDate = isSelected;
+                  if (mat) {
+                    selectedEvent = details.appointments!.first;
+                  } else {
+                    selectedEvent = details.appointments!.last;
+                  }
+                });
 
-              //print(details.appointments!.first.panier.length);
+                //print(details.appointments!.first.panier.length);
 
-              /*if (details.appointments!.isNotEmpty) {
+                /*if (details.appointments!.isNotEmpty) {
                 showModalBottomSheet(
                   context: context,
                   builder: (context) => TasksWidget(
@@ -355,23 +390,23 @@ class _CalendarWidgetState extends State<CalendarWidget> {
               } else {
                 const Text("RAF");
               }*/
-            },
-            onLongPress: (details) {
-              final provider = Provider.of<EventProvider>(context, listen: false);
+              },
+              onLongPress: (details) {
+                final provider =
+                    Provider.of<EventProvider>(context, listen: false);
 
-              provider.setDate(details.date!);
-              showModalBottomSheet(
-                context: context,
-                builder: (context) => TasksWidget(
-                  initialDate: details.date!,
-                  title: details.appointments!.first.title,
-                  events: events!,
-                ),
-              );
-            },
-          );
-        }
-      ),
+                provider.setDate(details.date!);
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) => TasksWidget(
+                    initialDate: details.date!,
+                    title: details.appointments!.first.title,
+                    events: events!,
+                  ),
+                );
+              },
+            );
+          }),
     );
   }
 
@@ -474,102 +509,69 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                 padding: const EdgeInsets.all(16.2),
                 child: GestureDetector(
                   onTap: () async {
-                      //Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddEvent(matinOuSoir: "Marché du soir")));
+                    //Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddEvent(matinOuSoir: "Marché du soir")));
 
+                    if (marchesDuJour.isNotEmpty) {
+                      if (title.contains("Marché du matin")) {
+                        print("Voie 1");
 
-                      if(marchesDuJour.isNotEmpty){
-                        if(title.contains("Marché du matin")){
-                          print("Voie 1");
-
-
-                          await EventDatabaseService().updateEvent(
-                            marchesDuJour[0].from,
-                            marchesDuJour[0].title,
-                            marchesDuJour[0].description,
-                            marchesDuJour[0].from,
-                            marchesDuJour[0].to,
-                            marchesDuJour[0].color.value,
-                            marchesDuJour[0].isAllDay,
-                            marchesDuJour[0].sun,
-                            marchesDuJour[0].cloud,
-                            marchesDuJour[0].tint,
-                            marchesDuJour[0].pooCloud,
-                            marchesDuJour[0].cloudSomething,
-                            marchesDuJour[0].panierCount,
-                            marchesDuJour[0].month,
-                            marchesDuJour[0].isActive,
-                          );
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => VenteWidget(
-                                selectedEvent: marchesDuJour[0],
-                                title: title,
-                              ),
+                        await EventDatabaseService().updateEvent(
+                          marchesDuJour[0].from,
+                          marchesDuJour[0].title,
+                          marchesDuJour[0].description,
+                          marchesDuJour[0].from,
+                          marchesDuJour[0].to,
+                          marchesDuJour[0].color.value,
+                          marchesDuJour[0].isAllDay,
+                          marchesDuJour[0].sun,
+                          marchesDuJour[0].cloud,
+                          marchesDuJour[0].tint,
+                          marchesDuJour[0].pooCloud,
+                          marchesDuJour[0].cloudSomething,
+                          marchesDuJour[0].panierCount,
+                          marchesDuJour[0].month,
+                          marchesDuJour[0].isActive,
+                        );
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => VenteWidget(
+                              selectedEvent: marchesDuJour[0],
+                              title: title,
                             ),
-                          );
-                        }else{
-                          print("Voie 2");
+                          ),
+                        );
+                      } else {
+                        print("Voie 2");
 
-                          await EventDatabaseService().updateEvent(
-                            marchesDuJour[1].from,
-                            marchesDuJour[1].title,
-                            marchesDuJour[1].description,
-                            marchesDuJour[1].from,
-                            marchesDuJour[1].to,
-                            marchesDuJour[1].color.value,
-                            marchesDuJour[1].isAllDay,
-                            marchesDuJour[1].sun,
-                            marchesDuJour[1].cloud,
-                            marchesDuJour[1].tint,
-                            marchesDuJour[1].pooCloud,
-                            marchesDuJour[1].cloudSomething,
-                            marchesDuJour[1].panierCount,
-                            marchesDuJour[1].month,
-                            marchesDuJour[1].isActive,
-                          );
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => VenteWidget(
-                                selectedEvent: marchesDuJour[1],
-                                title: title,
-                              ),
+                        await EventDatabaseService().updateEvent(
+                          marchesDuJour[1].from,
+                          marchesDuJour[1].title,
+                          marchesDuJour[1].description,
+                          marchesDuJour[1].from,
+                          marchesDuJour[1].to,
+                          marchesDuJour[1].color.value,
+                          marchesDuJour[1].isAllDay,
+                          marchesDuJour[1].sun,
+                          marchesDuJour[1].cloud,
+                          marchesDuJour[1].tint,
+                          marchesDuJour[1].pooCloud,
+                          marchesDuJour[1].cloudSomething,
+                          marchesDuJour[1].panierCount,
+                          marchesDuJour[1].month,
+                          marchesDuJour[1].isActive,
+                        );
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => VenteWidget(
+                              selectedEvent: marchesDuJour[1],
+                              title: title,
                             ),
-                          );
-                        }
-                      }else{
-                        showDialog<void>(
-                          context: context,
-                          barrierDismissible: false, // user must tap button!
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Row(
-                                children: const [
-                                  FaIcon(FontAwesomeIcons.exclamationCircle, color: kRedColor,),
-                                  SizedBox(width: 4.0,),
-                                  Text('ATTENTION ', style: TextStyle(fontWeight: FontWeight.bold, color: kRedColor),),
-                                ],
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                              ),
-                              content: SingleChildScrollView(
-                                child: ListBody(
-                                  children: const <Widget>[
-                                    Text("Veuillez sélectionner une date s'il vous plait !", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: kDefaultBackgroundColor),),
-                                  ],
-                                ),
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: const Text('Je sélectionne une date !'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
+                          ),
                         );
                       }
+                    } else {
+                      selectDatePopup();
+                    }
                   },
                   child: Text(
                     title,
@@ -584,6 +586,55 @@ class _CalendarWidgetState extends State<CalendarWidget> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> selectDatePopup() {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: const [
+              FaIcon(
+                FontAwesomeIcons.exclamationCircle,
+                color: kRedColor,
+              ),
+              SizedBox(
+                width: 4.0,
+              ),
+              Text(
+                'ATTENTION ',
+                style: TextStyle(fontWeight: FontWeight.bold, color: kRedColor),
+              ),
+            ],
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text(
+                  "Veuillez sélectionner une date s'il vous plait !",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: kDefaultBackgroundColor),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Je sélectionne une date !'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -609,7 +660,9 @@ class _CalendarWidgetState extends State<CalendarWidget> {
         .collection("all")
         .get();
 
-    final allEvents = EventDatabaseService(year: _initialDate.year, month: _initialDate.month).allEvents;
+    final allEvents =
+        EventDatabaseService(year: _initialDate.year, month: _initialDate.month)
+            .allEvents;
 
     var dateMap = {
       "start": DateTime(_initialDate.year, _initialDate.month, 1, 8, 0, 0),
@@ -625,23 +678,25 @@ class _CalendarWidgetState extends State<CalendarWidget> {
     var days = calculateDaysInterval(dateMap);
     var days2 = calculateDaysInterval(dateMap2);
 
-    if(whichOne.contains("Marché du matin")){
+    if (whichOne.contains("Marché du matin")) {
       for (var i = 0; i < days.length; i++) {
         await EventDatabaseService(eventUid: "Marché du soir")
             .dontShow(false, "isActive", days[i].month, days[i]);
       }
-    }else if(whichOne.contains("Marché du soir")){
+    } else if (whichOne.contains("Marché du soir")) {
       for (var i = 0; i < days2.length; i++) {
         await EventDatabaseService(eventUid: "Marché du matin")
             .dontShow(false, "isActive", days[i].month, days[i]);
       }
-    }else{
+    } else {
       setState(() {
         visible = !visible;
       });
       for (var i = 0; i < days2.length; i++) {
-        await EventDatabaseService(eventUid: "Marché du matin").dontShow(false, "isActive", days[i].month, days[i]);
-        await EventDatabaseService(eventUid: "Marché du soir").dontShow(false, "isActive", days[i].month, days[i]);
+        await EventDatabaseService(eventUid: "Marché du matin")
+            .dontShow(false, "isActive", days[i].month, days[i]);
+        await EventDatabaseService(eventUid: "Marché du soir")
+            .dontShow(false, "isActive", days[i].month, days[i]);
       }
     }
 

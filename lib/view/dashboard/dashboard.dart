@@ -275,7 +275,7 @@ class _DashboardState extends State<Dashboard> {
     final path = selected.files.single.path;
 
     setState(() {
-      file = File(path);
+      file = File(path!);
     });
     uploadFile();
   }

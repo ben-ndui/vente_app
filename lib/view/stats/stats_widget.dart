@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:suividevente/controller/event_databases/event_databases.dart';
 import 'package:suividevente/model/chiffres_by_month.dart';
@@ -499,55 +500,15 @@ class _StatsWidgetState extends State<StatsWidget> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        event.sun
-            ? FaIcon(
-          WeatherIcons.day_sunny,
-                color: event.title == "Marché du matin"
-                    ? kYellowColor
-                    : kBlueColor,
-                size: 18.0,
-              )
-            : Container(),
+        event.sun ? buidIcon('assets/weather/sun.svg', event) : Container(),
         const SizedBox(width: 5.0,),
-        event.cloud
-            ? FaIcon(
-          WeatherIcons.cloud,
-                color: event.title == "Marché du matin"
-                    ? kYellowColor
-                    : kBlueColor,
-                size: 18.0,
-              )
-            : Container(),
+        event.cloud ? buidIcon('assets/weather/cloud.svg', event) : Container(),
         const SizedBox(width: 5.0,),
-        event.tint
-            ? FaIcon(
-          WeatherIcons.day_rain,
-                color: event.title == "Marché du matin"
-                    ? kYellowColor
-                    : kBlueColor,
-                size: 18.0,
-              )
-            : Container(),
+        event.tint ? buidIcon('assets/weather/raindrops.svg', event): Container(),
         const SizedBox(width: 5.0,),
-        event.pooCloud
-            ? FaIcon(
-          WeatherIcons.day_storm_showers,
-                color: event.title == "Marché du matin"
-                    ? kYellowColor
-                    : kBlueColor,
-                size: 18.0,
-              )
-            : Container(),
+        event.pooCloud ? buidIcon('assets/weather/bolt.svg', event): Container(),
         const SizedBox(width: 5.0,),
-        event.cloudSomething
-            ? FaIcon(
-          WeatherIcons.snow_wind,
-                color: event.title == "Marché du matin"
-                    ? kYellowColor
-                    : kBlueColor,
-                size: 18.0,
-              )
-            : Container(),
+        event.cloudSomething ? buidIcon('assets/weather/snowflakes.svg', event) : Container(),
       ],
     );
   }
@@ -760,9 +721,7 @@ class _StatsWidgetState extends State<StatsWidget> {
   }
 
   getTotalByYearAndChiffre() async {
-    final chiffresss =
-        EventDatabaseService(month: dateTime.month, year: dateTime.year)
-            .allMonth;
+    final chiffresss = EventDatabaseService(month: dateTime.month, year: dateTime.year).allMonth;
 
     chiffresss.forEach((chifList) {
       for (var element in chifList) {
@@ -946,5 +905,16 @@ class _StatsWidgetState extends State<StatsWidget> {
         e.data()['isActive'],
       );
     }).toList();
+  }
+
+  Widget buidIcon(String iconPath, MyEvent event) {
+    return SvgPicture.asset(
+      iconPath,
+      color: event.title == "Marché du matin"
+          ? kYellowColor
+          : kBlueColor,
+      width: 18.0,
+      height: 18.0,
+    );
   }
 }
