@@ -49,8 +49,7 @@ class _VenteWidgetState extends State<VenteWidget>
 
   int somme = 1;
   double totalPanier = 0.0;
-
-  var tempp = 0.0;
+  double temp = 0.0;
 
   bool sun = false;
   bool cloud = false;
@@ -609,191 +608,7 @@ class _VenteWidgetState extends State<VenteWidget>
                           style: const TextStyle(color: kWhiteColor),
                         ),
                         trailing: delprod
-                            ? IconButton(
-                                onPressed: () {
-                                  showDialog<String>(
-                                    context: context,
-                                    builder: (BuildContext context) =>
-                                        AlertDialog(
-                                      title: const Text(
-                                        "Etes vous sur de vouloir \n retirer un article ?",
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      actions: [
-                                        Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: TextButton(
-                                                onPressed: () => Navigator.pop(
-                                                    context, 'Cancel'),
-                                                child: const Text(
-                                                  'Cancel',
-                                                  style: TextStyle(
-                                                    color: kWhiteColor,
-                                                  ),
-                                                ),
-                                                style: TextButton.styleFrom(
-                                                  backgroundColor: kRedColor,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              width: 10.0,
-                                            ),
-                                            StreamBuilder<ChiffresByMonth>(
-                                                stream: EventDatabaseService(
-                                                        month: widget
-                                                            .selectedEvent
-                                                            .from
-                                                            .month,
-                                                        year: widget
-                                                            .selectedEvent
-                                                            .from
-                                                            .year,
-                                                        eventUid: widget.title)
-                                                    .getChiffre(widget
-                                                        .selectedEvent.from),
-                                                builder: (context, snapshotD) {
-                                                  return Expanded(
-                                                    child: TextButton(
-                                                      onPressed: () async {
-                                                        userPanier[index]
-                                                            .setProdNb(-1);
-                                                        Product product =
-                                                            Product(
-                                                          uid: userPanier[index]
-                                                              .uid,
-                                                          title:
-                                                              userPanier[index]
-                                                                  .title,
-                                                          price:
-                                                              userPanier[index]
-                                                                  .price,
-                                                          img: userPanier[index]
-                                                              .img,
-                                                          nbProd:
-                                                              userPanier[index]
-                                                                  .nbProd,
-                                                          isHidden:
-                                                              userPanier[index]
-                                                                  .isHidden,
-                                                        );
-                                                        widget.selectedEvent
-                                                            .panier
-                                                            .remove(product);
-
-                                                        var tempp = 0.0;
-
-                                                        if (snapshot.data !=
-                                                                null &&
-                                                            snapshot.data!
-                                                                .isNotEmpty) {
-                                                          tempp = snapshotD
-                                                                  .data!
-                                                                  .chiffres -
-                                                              double.parse(
-                                                                  userPanier[
-                                                                          index]
-                                                                      .price);
-                                                        } else if (snapshot
-                                                            .data!.isEmpty) {
-                                                          tempp = 0.0;
-                                                        } else {
-                                                          tempp = tempp -
-                                                              double.parse(
-                                                                  userPanier[
-                                                                          index]
-                                                                      .price);
-                                                        }
-
-                                                        EventDatabaseService(
-                                                                year: widget
-                                                                    .selectedEvent
-                                                                    .from
-                                                                    .year,
-                                                                month: widget
-                                                                    .selectedEvent
-                                                                    .from
-                                                                    .month)
-                                                            .saveChiffres(
-                                                                widget
-                                                                    .selectedEvent
-                                                                    .title,
-                                                                widget
-                                                                    .selectedEvent
-                                                                    .from
-                                                                    .month,
-                                                                tempp,
-                                                                widget
-                                                                    .selectedEvent
-                                                                    .from);
-
-                                                        await EventDatabaseService()
-                                                            .addEventToCart(
-                                                          widget.title,
-                                                          snapshot
-                                                              .data![index].uid,
-                                                          snapshot.data![index]
-                                                              .title,
-                                                          snapshot.data![index]
-                                                              .price,
-                                                          snapshot
-                                                              .data![index].img,
-                                                          snapshot.data![index]
-                                                              .nbProd,
-                                                          widget.selectedEvent
-                                                              .month,
-                                                          widget.selectedEvent
-                                                              .from,
-                                                          snapshot.data![index]
-                                                              .isHidden,
-                                                        );
-
-                                                        getSoldeEvent();
-
-                                                        await EventDatabaseService(
-                                                                eventUid: widget
-                                                                    .title)
-                                                            .updateEventTotalPanier(
-                                                          totalPanier,
-                                                          "panier",
-                                                          widget.selectedEvent
-                                                              .from.month,
-                                                          widget.selectedEvent
-                                                              .from,
-                                                        )
-                                                            .then((value) {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        });
-                                                      },
-                                                      child: const Text(
-                                                        'Enlever',
-                                                        style: TextStyle(
-                                                            color: kWhiteColor),
-                                                      ),
-                                                      style:
-                                                          TextButton.styleFrom(
-                                                        backgroundColor:
-                                                            Colors.green,
-                                                      ),
-                                                    ),
-                                                  );
-                                                }),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  );
-                                },
-                                icon: const FaIcon(
-                                  FontAwesomeIcons.times,
-                                  color: kRedColor,
-                                ),
-                              )
+                            ? buildIcon(context, userPanier, index,)
                             : null,
                       ),
                     ),
@@ -833,15 +648,17 @@ class _VenteWidgetState extends State<VenteWidget>
               }
             }
 
-            return StreamBuilder<ChiffresByMonth>(
+            return StreamBuilder<List<ChiffresByMonth>>(
 
                 /// CHIFFRES STREAM
                 stream: EventDatabaseService(
                         month: widget.selectedEvent.from.month,
                         year: widget.selectedEvent.from.year)
-                    .getChiffre(widget.selectedEvent.from),
-                builder: (context, snapshot) {
-                  final chiffres = snapshot.data;
+                    .allMonth,
+                builder: (context, snapshotChiffre) {
+                  if(!snapshot.hasData) return const CircularProgressIndicator();
+                  final chiffres = snapshotChiffre.data;
+
                   return GridView.builder(
                     /// GRIDVIEW BUILDER
                     shrinkWrap: true,
@@ -871,8 +688,6 @@ class _VenteWidgetState extends State<VenteWidget>
                             return GestureDetector(
                               onTap: () async {
                                 print("Ajouté !");
-
-                                var tempp = 0.0;
                                 int nbprod = 0;
 
                                 for (var element in panierDuJour!) {
@@ -881,6 +696,9 @@ class _VenteWidgetState extends State<VenteWidget>
                                     element.nbProd = element.nbProd + 1;
                                     nbprod = element.nbProd;
                                   }
+                                  else{
+                                    nbprod = 1;
+                                  }
                                 }
 
                                 Product product = Product(
@@ -888,64 +706,19 @@ class _VenteWidgetState extends State<VenteWidget>
                                   title: allProducts[index].title,
                                   price: allProducts[index].price,
                                   img: allProducts[index].img,
-                                  nbProd: nbprod != 0
-                                      ? nbprod
-                                      : allProducts[index].nbProd,
+                                  nbProd: nbprod != 0 ? nbprod : allProducts[index].nbProd,
                                   isHidden: allProducts[index].isHidden,
                                 );
 
-                                setState(() {
-                                  widget.selectedEvent
-                                      .addProductToPanier(product);
-                                });
+                                setState(() { widget.selectedEvent.addProductToPanier(product);});
 
-                                await EventDatabaseService().addEventToCart(
-                                  widget.title,
-                                  product.uid,
-                                  product.title,
-                                  product.price,
-                                  product.img,
-                                  product.nbProd,
-                                  widget.selectedEvent.month,
-                                  widget.selectedEvent.from,
-                                  product.isHidden,
-                                );
+                                EventDatabaseService().addEventToCart(widget.title, product.uid, product.title, product.price, product.img, product.nbProd, widget.selectedEvent.month, widget.selectedEvent.from, product.isHidden,);
 
                                 getSoldeEvent();
 
-                                EventDatabaseService(eventUid: widget.title)
-                                    .updateEventTotalPanier(
-                                        totalPanier,
-                                        "panier",
-                                        widget.selectedEvent.month,
-                                        widget.selectedEvent.from);
+                                EventDatabaseService(eventUid: widget.title).updateEventTotalPanier(totalPanier, "panier", widget.selectedEvent.month, widget.selectedEvent.from);
 
-                                if(nbprod != 0){
-
-                                  tempp = tempp + (double.parse(allProducts[index].price) * nbprod);
-
-                                  EventDatabaseService(
-                                      year: widget.selectedEvent.from.year,
-                                      month: widget.selectedEvent.from.month)
-                                      .updateChiffres(
-                                    widget.selectedEvent.title,
-                                    widget.selectedEvent.from.month,
-                                    tempp,
-                                    widget.selectedEvent.from,
-                                  );
-                                }else{
-                                  tempp = tempp + double.parse(allProducts[index].price);
-
-                                  EventDatabaseService(
-                                      year: widget.selectedEvent.from.year,
-                                      month: widget.selectedEvent.from.month)
-                                      .saveChiffres(
-                                    widget.selectedEvent.title,
-                                    widget.selectedEvent.from.month,
-                                    tempp,
-                                    widget.selectedEvent.from,
-                                  );
-                                }
+                                EventDatabaseService(year: widget.selectedEvent.from.year, month: widget.selectedEvent.from.month).saveChiffres(product.title, widget.selectedEvent.from.month, double.parse(product.price), widget.selectedEvent.from, product.nbProd, widget.title);
                                 allProducts[index].setProdNb(1);
                               },
                               child: Card(
@@ -1006,6 +779,90 @@ class _VenteWidgetState extends State<VenteWidget>
                   );
                 });
           }),
+    );
+  }
+
+  Widget buildIcon(BuildContext context, List<Product> userPanier, int index){
+    return IconButton(
+      onPressed: () {
+        showDialog<String>(
+          context: context,
+          builder: (BuildContext context) =>
+              AlertDialog(
+                title: const Text(
+                  "Etes vous sur de vouloir \n retirer un article ?",
+                  textAlign: TextAlign.center,
+                ),
+                actions: [
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(context, 'Cancel'),
+                          child: const Text('Cancel', style: TextStyle(color: kWhiteColor,),),
+                          style: TextButton.styleFrom(backgroundColor: kRedColor,),
+                        ),
+                      ),
+                      const SizedBox(width: 10.0,),
+                      StreamBuilder<ChiffresByMonth>(
+                          stream: EventDatabaseService(
+                              month: widget.selectedEvent.from.month,
+                              year: widget.selectedEvent.from.year,
+                              eventUid: widget.title).getChiffre(widget.selectedEvent.from),
+                          builder: (context, snapshotD) {
+                            return Expanded(
+                              child: TextButton(
+                                onPressed: () async {
+                                  userPanier[index].setProdNb(-1);
+                                  Product product = Product(
+                                    uid: userPanier[index].uid,
+                                    title: userPanier[index].title,
+                                    price: userPanier[index].price,
+                                    img: userPanier[index].img,
+                                    nbProd: userPanier[index].nbProd,
+                                    isHidden: userPanier[index].isHidden,
+                                  );
+
+                                  widget.selectedEvent.panier.remove(product);
+
+                                  var tempp = 0.0;
+
+                                  if (userPanier.isNotEmpty) {
+                                    if(snapshotD.hasData){
+                                      tempp = snapshotD.data!.chiffres - double.parse(userPanier[index].price);
+                                    }
+                                  } else if (userPanier.isEmpty) {
+                                    tempp = 0.0;
+                                  } else {
+                                    tempp = snapshotD.data!.chiffres - double.parse(userPanier[index].price);
+                                  }
+
+                                  await EventDatabaseService(year: widget.selectedEvent.from.year, month: widget.selectedEvent.from.month).deleteChiffres(userPanier[index].title, widget.selectedEvent.from.month, tempp, widget.selectedEvent.from, userPanier[index].nbProd + 1, widget.title);
+                                  print("USER PANIER ${userPanier[index].nbProd}");
+
+                                  EventDatabaseService().addEventToCart(widget.title, userPanier[index].uid, userPanier[index].title, userPanier[index].price, userPanier[index].img, userPanier[index].nbProd, widget.selectedEvent.month,widget.selectedEvent.from, userPanier[index].isHidden,);
+
+                                  getSoldeEvent();
+
+                                  EventDatabaseService(eventUid: widget.title).updateEventTotalPanier(totalPanier, "panier", widget.selectedEvent.from.month, widget.selectedEvent.from,).then((value) {Navigator.of(context).pop();});
+                                },
+                                child: const Text('Enlever', style: TextStyle(color: kWhiteColor),),
+                                style: TextButton.styleFrom(backgroundColor: Colors.green,),
+                              ),
+                            );
+                          }),
+                    ],
+                  )
+                ],
+              ),
+        );
+      },
+      icon: const FaIcon(
+        FontAwesomeIcons.times,
+        color: kRedColor,
+      ),
     );
   }
 }

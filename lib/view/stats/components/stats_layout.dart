@@ -4,7 +4,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:suividevente/utils/constants.dart';
 import 'package:suividevente/utils/menu_item.dart';
 import 'package:suividevente/view/dashboard/dashboard.dart';
-import 'package:suividevente/view/home/calendar_widget.dart';
 import 'package:suividevente/view/layout/layout.dart';
 import 'package:suividevente/view/stats/stats_widget.dart';
 

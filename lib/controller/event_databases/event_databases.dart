@@ -286,9 +286,11 @@ class EventDatabaseService extends ChangeNotifier {
     int? cfMonth,
     double? chiffres,
     DateTime? day,
+      int? nbart,
+      String marcheDu,
   ) async {
     return await chiffresCollection
-        .doc("$year").collection("$month").doc('$month - $title - ${day!.day}')
+        .doc("$year").collection("$month").doc(marcheDu).collection("all").doc('$month - $title - ${day!.day} - $nbart')
         .set(
       {
         'title': title,
@@ -296,6 +298,20 @@ class EventDatabaseService extends ChangeNotifier {
         'chiffres': chiffres,
       },
     );
+  }
+
+  Future<void> deleteChiffres(
+    String? title,
+    int? cfMonth,
+    double? chiffres,
+    DateTime? day,
+      int? nbart,
+      String marcheDu,
+  ) async {
+    print("DELETE");
+    print("$nbart");
+    return await chiffresCollection
+        .doc("$year").collection("$month").doc(marcheDu).collection("all").doc('$month - $title - ${day!.day} - $nbart').delete();
   }
 
   Future<void> updateChiffres(
