@@ -290,7 +290,7 @@ class EventDatabaseService extends ChangeNotifier {
       String marcheDu,
   ) async {
     return await chiffresCollection
-        .doc("$year").collection("$month").doc(marcheDu).collection("all").doc('$month - $title - ${day!.day} - $nbart')
+        .doc("$year").collection("all").doc(marcheDu).collection("all").doc('$month - $title - ${day!.day} - $nbart')
         .set(
       {
         'title': title,
@@ -311,7 +311,7 @@ class EventDatabaseService extends ChangeNotifier {
     print("DELETE");
     print("$nbart");
     return await chiffresCollection
-        .doc("$year").collection("$month").doc(marcheDu).collection("all").doc('$month - $title - ${day!.day} - $nbart').delete();
+        .doc("$year").collection("all").doc(marcheDu).collection("all").doc('$month - $title - ${day!.day} - $nbart').delete();
   }
 
   Future<void> updateChiffres(
@@ -321,7 +321,7 @@ class EventDatabaseService extends ChangeNotifier {
     DateTime? day,
   ) async {
     return await chiffresCollection
-        .doc("$year").collection("$month").doc('$cfMonth - $title - ${day!.day}')
+        .doc("$year").collection("all").doc('$title').collection('all').doc('$cfMonth - $title - ${day!.day}')
         .update(
       {
         'title': title,
@@ -411,7 +411,7 @@ class EventDatabaseService extends ChangeNotifier {
   }
 
   Stream<ChiffresByMonth> getChiffre(DateTime? mois){
-    return chiffresCollection.doc("${mois!.year}").collection("${mois.month}").doc("${mois.month} - $eventUid - ${mois.day}").snapshots().map(_chiffresFromSnapShot);
+    return chiffresCollection.doc("${mois!.year}").collection("all").doc("${mois.month} - $eventUid - ${mois.day}").snapshots().map(_chiffresFromSnapShot);
   }
 
   /// Stream list to get all users
@@ -425,8 +425,7 @@ class EventDatabaseService extends ChangeNotifier {
 
   Stream<List<ChiffresByMonth>> get allMonth {
     return chiffresCollection
-        .doc('$year')
-        .collection("$month")
+        .doc("$year").collection("all").doc('$eventUid').collection("all")
         .snapshots()
         .map(_chiffresListFromSnapShot);
   }

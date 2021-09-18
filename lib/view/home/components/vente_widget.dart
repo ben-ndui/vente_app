@@ -688,7 +688,7 @@ class _VenteWidgetState extends State<VenteWidget>
                             return GestureDetector(
                               onTap: () async {
                                 print("Ajouté !");
-                                int nbprod = 0;
+                                int nbprod = 1;
 
                                 for (var element in panierDuJour!) {
                                   if (element.uid
@@ -706,15 +706,15 @@ class _VenteWidgetState extends State<VenteWidget>
                                   title: allProducts[index].title,
                                   price: allProducts[index].price,
                                   img: allProducts[index].img,
-                                  nbProd: nbprod != 0 ? nbprod : allProducts[index].nbProd,
+                                  nbProd: nbprod,
                                   isHidden: allProducts[index].isHidden,
                                 );
 
                                 setState(() { widget.selectedEvent.addProductToPanier(product);});
 
-                                EventDatabaseService().addEventToCart(widget.title, product.uid, product.title, product.price, product.img, product.nbProd, widget.selectedEvent.month, widget.selectedEvent.from, product.isHidden,);
-
                                 getSoldeEvent();
+
+                                EventDatabaseService().addEventToCart(widget.title, product.uid, product.title, product.price, product.img, product.nbProd, widget.selectedEvent.month, widget.selectedEvent.from, product.isHidden,);
 
                                 EventDatabaseService(eventUid: widget.title).updateEventTotalPanier(totalPanier, "panier", widget.selectedEvent.month, widget.selectedEvent.from);
 

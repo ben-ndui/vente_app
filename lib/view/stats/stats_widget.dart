@@ -56,6 +56,7 @@ class _StatsWidgetState extends State<StatsWidget> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    activeSoir = true;
     getAllEvent();
     getTotalByMonthAndEvent();
     getTotalByYearAndChiffre();
@@ -192,9 +193,7 @@ class _StatsWidgetState extends State<StatsWidget> {
                   yearIsActive ? buildDayForCurrentYear() : buildMonthStats(),
             ),
             StreamBuilder<List<ChiffresByMonth>>(
-                stream: EventDatabaseService(
-                        month: dateTime.month, year: dateTime.year)
-                    .allMonth,
+                stream: EventDatabaseService(eventUid: activeMatin ? 'Marché du matin' : 'Marché du soir', month: dateTime.month, year: dateTime.year).allMonth,
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) return const Text("Rien à afficher");
                   return !yearIsActive ? Text(
@@ -721,89 +720,66 @@ class _StatsWidgetState extends State<StatsWidget> {
   }
 
   getTotalByYearAndChiffre() async {
-    final chiffresss = EventDatabaseService(month: dateTime.month, year: dateTime.year).allMonth;
+    final chiffresMatin =
+        EventDatabaseService(eventUid: "Marché du matin", month: dateTime.month, year: dateTime.year)
+            .allMonth;
 
-    chiffresss.forEach((chifList) {
+    final chiffresSoir =
+        EventDatabaseService(eventUid: "Marché du soir", month: dateTime.month, year: dateTime.year)
+            .allMonth;
+
+    chiffresMatin.forEach((chifList) {
       for (var element in chifList) {
-        //print(element.chiffres);
+        //print(element.panierCount);
         setState(() {
-          if(element.title.contains("matin")) {
-            totalMatinYear = totalMatinYear + element.chiffres;
-          } else {
-            totalSoirYear = totalSoirYear + element.chiffres;
-          }
+          totalMatinYear = totalMatinYear + element.chiffres;
         });
       }
     });
 
-    if (totalMatin < 0) {
+    chiffresSoir.forEach((chifList) {
+      for (var element in chifList) {
+        //print(element.panierCount);
+        setState(() {
+          totalSoirYear = totalSoirYear + element.chiffres;
+        });
+      }
+    });
+
+    if (totalMatinYear < 0 || totalSoirYear < 0) {
       totalMatin = 0.0;
+      totalSoir = 0.0;
     }
   }
 
   Widget buildDayForCurrentYear() {
-    return StreamBuilder<List<ChiffresByMonth>>(
-      stream: EventDatabaseService(month: dateTime.month, year: dateTime.year)
-          .allMonth,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return const CircularProgressIndicator();
-
-        final data = snapshot.data;
-
-        data!.sort((a, b) {
-          return a.cfMonth.month.compareTo(b.cfMonth.month);
-        });
-
-        return GridView.builder(
-          shrinkWrap: true,
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 500,
-            childAspectRatio: 5,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
-          ),
-          itemCount: data.length,
-          itemBuilder: (context, index) {
-            final Object chiffress;
-            if (data[index].chiffres < 0) {
-              EventDatabaseService(
-                      year: _initialDate.year, month: data[index].cfMonth.month)
-                  .updateChiffres(data[index].title, data[index].cfMonth.month,
-                      0.0, _initialDate);
-            }
-            chiffress = data[index].chiffres;
-
-            return GridTile(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        Utils.toMonth(data[index].cfMonth) + " : $chiffress",
-                        style: const TextStyle(
-                          color: kWhiteColor,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        data[index].title,
-                        style: const TextStyle(
-                          color: kWhiteColor,
-                          fontSize: 10.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+    return GridTile(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Text(
+                "Chiffres réalisé sur toutes l'année",
+                style: TextStyle(
+                  color: kWhiteColor,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            );
-          },
-        );
-      },
+              /*Text(
+                            data[index].title,
+                            style: const TextStyle(
+                              color: kWhiteColor,
+                              fontSize: 10.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),*/
+            ],
+          ),
+        ),
+      ),
     );
   }
 

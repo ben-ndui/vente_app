@@ -51,7 +51,9 @@ class _LayoutState extends State<Layout> {
           MenuItem(
             title: "Calendriers",
             icon: const FaIcon(FontAwesomeIcons.calendar, color: kWhiteColor, size: 15.0,),
-            func: () {},
+            func: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => FadeIn(child: const Layout())));
+            },
           ),
           MenuItem(
             title: "Produits",
